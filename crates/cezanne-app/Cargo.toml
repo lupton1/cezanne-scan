@@ -1,0 +1,6 @@
+[package]
+name = "cezanne-app"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
