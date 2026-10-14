@@ -6,6 +6,7 @@
 //! * [`scanner`] is the high level driver used by the app and the CLI.
 //! * [`image`] turns raw scanner data into finished 16 bit TIFF files.
 
+pub mod connect;
 pub mod error;
 pub mod image;
 pub mod preset;

@@ -1,6 +1,19 @@
 [package]
 name = "cezanne-cli"
+description = "Command line tool for the SCREEN Cezanne FT-S5000: discover, probe and scan"
 version.workspace = true
 edition.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+[[bin]]
+name = "cezanne-cli"
+path = "src/main.rs"
 
 [dependencies]
+cezanne-core.workspace = true
+clap.workspace = true
+log.workspace = true
+env_logger.workspace = true
+serde_json.workspace = true

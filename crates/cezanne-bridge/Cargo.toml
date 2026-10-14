@@ -1,6 +1,18 @@
 [package]
 name = "cezanne-bridge"
+description = "Shares a SCREEN Cezanne scanner over the network so any computer (including Macs) can use it"
 version.workspace = true
 edition.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+[[bin]]
+name = "cezanne-bridge"
+path = "src/main.rs"
 
 [dependencies]
+cezanne-core.workspace = true
+clap.workspace = true
+log.workspace = true
+env_logger.workspace = true

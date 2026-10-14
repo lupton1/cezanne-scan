@@ -39,6 +39,14 @@ impl Scanner {
         }
         let limits = ModelLimits::for_product(&inquiry.product);
         log::info!("opened {} {} rev {} via {}", inquiry.vendor, inquiry.product, inquiry.revision, t.describe());
+        // Consume a pending power on UNIT ATTENTION so the next real command does not fail.
+        // NOT READY (warm up) is fine here, wait_ready handles it before scanning.
+        for _ in 0..2 {
+            match scsi::run(t.as_mut(), &cdb::test_unit_ready(), DataPhase::None, SHORT) {
+                Err(Error::Scsi { sense: Some(s), .. }) if s.key == SenseKey::UnitAttention => continue,
+                _ => break,
+            }
+        }
         Ok(Scanner { t, inquiry, limits, reserved: false })
     }
 
