@@ -2,6 +2,7 @@
 
 pub mod icc;
 pub mod pipeline;
+pub mod png;
 pub mod tiff;
 
 pub use pipeline::{Adjustments, Curve, FilmType};
