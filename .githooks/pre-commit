@@ -1,0 +1,8 @@
+#!/bin/sh
+# Block SCREEN vendor material from ever being committed.
+bad=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '^(vendor|re)/|\.(jfirm|C5T|icc|CTP|jnilib)$|AIParameterFile|InferentialData|JavaClassesUsr\.jar')
+if [ -n "$bad" ]; then
+  echo "pre-commit: refusing to commit SCREEN vendor material:" >&2
+  echo "$bad" >&2
+  exit 1
+fi

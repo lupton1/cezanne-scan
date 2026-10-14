@@ -1,0 +1,8 @@
+# SCREEN vendor files and decompiled code: never commit
+/vendor/
+/re/
+# Build output
+/target/
+/dist/
+*.pdb
+.DS_Store
