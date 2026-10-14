@@ -46,5 +46,12 @@ The first test steps are in [hardware.md](hardware.md).
 
 ## Continuous integration
 
-The GitHub Actions workflow builds the Windows, macOS and Linux installers. If a run fails
-its log is on the Actions tab of the repository.
+The GitHub Actions workflow builds the Windows, macOS and Linux installers. The first
+packaging run was started by the commit "Packaging, CI and documentation [package]" on
+2026-10-15. Its result has not been checked yet (the repository is private and was not
+viewable from the build machine). Check the Actions tab. The installers are attached to the
+run as artifacts. If a job failed, its log shows why.
+
+A locally built Windows installer (from the LLVM MinGW toolchain, see building.md) was
+tested on 2026-10-15: per user install without admin rights, app demo run, CLI and bridge
+run, clean uninstall.

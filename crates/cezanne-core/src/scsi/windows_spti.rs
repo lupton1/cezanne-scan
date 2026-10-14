@@ -189,8 +189,15 @@ impl Transport for SptiTransport {
 /// SCREEN scanner. Uses IOCTL_SCSI_GET_INQUIRY_DATA, so no commands go to the devices.
 pub fn discover() -> Result<Vec<DeviceInfo>> {
     let mut found = Vec::new();
+    let mut denied = false;
     for n in 0..16u32 {
-        let Ok(h) = open_adapter(n) else { continue };
+        let h = match open_adapter(n) {
+            Ok(h) => h,
+            Err(e) => {
+                denied |= e.to_string().contains("access denied");
+                continue;
+            }
+        };
         let mut buf = vec![0u8; 16 * 1024];
         let mut returned = 0u32;
         // SAFETY: output buffer is valid for its length.
@@ -241,6 +248,12 @@ pub fn discover() -> Result<Vec<DeviceInfo>> {
                 off = next;
             }
         }
+    }
+    if found.is_empty() && denied {
+        return Err(Error::Io(std::io::Error::new(
+            std::io::ErrorKind::PermissionDenied,
+            "the SCSI adapters could not be opened: run Cezanne Scan as administrator",
+        )));
     }
     Ok(found)
 }
