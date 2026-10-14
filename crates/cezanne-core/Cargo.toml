@@ -3,7 +3,7 @@ name = "cezanne-core"
 description = "Driver, protocol and image pipeline for the SCREEN Cezanne FT-S5000 scanner"
 version.workspace = true
 edition.workspace = true
-license.workspace = true
+publish.workspace = true
 repository.workspace = true
 authors.workspace = true
 

@@ -3,7 +3,7 @@ name = "cezanne-cli"
 description = "Command line tool for the SCREEN Cezanne FT-S5000: discover, probe and scan"
 version.workspace = true
 edition.workspace = true
-license.workspace = true
+publish.workspace = true
 repository.workspace = true
 authors.workspace = true
 

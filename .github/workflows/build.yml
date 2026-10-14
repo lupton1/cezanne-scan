@@ -1,0 +1,96 @@
+name: build
+
+# Tests run on every push to main (Linux only, cheap).
+# Installers for Windows, macOS and Linux are built when:
+#   * a tag starting with v is pushed (also creates a DRAFT GitHub release), or
+#   * the workflow is started by hand (Actions tab, Run workflow), or
+#   * a commit message on main contains [package].
+# Private repositories pay for Actions minutes (macOS minutes count ten times),
+# which is why installers are not built on every push.
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  CARGO_TERM_COLOR: always
+  PACKAGER_VERSION: 0.11.8
+
+jobs:
+  test:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Linux libraries for the GUI
+        run: sudo apt-get update && sudo apt-get install -y libxkbcommon-dev libgl1-mesa-dev libx11-dev libxcursor-dev libxrandr-dev libxi-dev libwayland-dev
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo test --workspace
+      - name: Simulated scan through the CLI
+        run: cargo run --release -p cezanne-cli -- scan --sim --dpi 300 --film color-negative --auto -o sim.tif
+
+  package:
+    needs: test
+    if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[package]')
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            formats: nsis
+          - os: macos-14
+            target: aarch64-apple-darwin
+            formats: app,dmg
+          - os: ubuntu-22.04
+            target: x86_64-unknown-linux-gnu
+            formats: deb,appimage
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+      - name: Linux libraries
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y libxkbcommon-dev libgl1-mesa-dev libx11-dev libxcursor-dev libxrandr-dev libxi-dev libwayland-dev libfuse2 file
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ matrix.target }}
+      - name: Install cargo-packager
+        shell: bash
+        run: cargo install cargo-packager --locked --version "$PACKAGER_VERSION"
+      - name: Build
+        run: cargo build --release --workspace --target ${{ matrix.target }}
+      - name: Package
+        shell: bash
+        run: |
+          OUT="target/${{ matrix.target }}/release"
+          cargo packager -c Packager.toml --release --target ${{ matrix.target }} --formats ${{ matrix.formats }} --out-dir "$OUT"
+          mkdir -p out
+          find "$OUT" -maxdepth 1 -type f \( -name '*-setup.exe' -o -name '*.dmg' -o -name '*.deb' -o -name '*.AppImage' \) -exec cp {} out/ \;
+          ls -la out
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cezanne-scan-${{ matrix.target }}
+          path: out/*
+          if-no-files-found: error
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: package
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+      - uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          files: artifacts/*

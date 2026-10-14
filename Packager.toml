@@ -1,0 +1,37 @@
+# cargo-packager configuration. Build installers with:
+#   cargo build --release --workspace
+#   cargo packager --release --formats nsis        (Windows)
+#   cargo packager --release --formats app,dmg     (macOS)
+#   cargo packager --release --formats deb,appimage (Linux)
+name = "cezanne-scan"
+product-name = "Cezanne Scan"
+version = "0.1.0"
+identifier = "com.lupton1.cezanne-scan"
+description = "Scanning software for the SCREEN Cezanne FT-S5000 film scanner"
+long-description = "A modern replacement for ColorGeniusEX: prescan, frame selection, HD and SD density controls, curves and 16 bit TIFF output. Includes a network bridge so Macs without SCSI can use a scanner attached to another computer."
+homepage = "https://github.com/lupton1/cezanne-scan"
+authors = ["lupton1"]
+publisher = "lupton1"
+copyright = "Copyright 2026 lupton1"
+category = "Photography"
+icons = ["packaging/icons/icon.png", "packaging/icons/icon.ico", "packaging/icons/icon.icns", "packaging/icons/128x128.png", "packaging/icons/32x32.png"]
+binaries = [
+  { path = "cezanne-scan", main = true },
+  { path = "cezanne-cli" },
+  { path = "cezanne-bridge" },
+]
+
+[nsis]
+# per user install, no administrator rights needed
+installer-mode = "currentUser"
+installer-icon = "packaging/icons/icon.ico"
+
+[deb]
+depends = ["libgl1", "libxkbcommon0"]
+section = "graphics"
+
+[deb.files]
+"packaging/linux/60-cezanne-scan.rules" = "lib/udev/rules.d/60-cezanne-scan.rules"
+
+[macos]
+minimum-system-version = "12.0"

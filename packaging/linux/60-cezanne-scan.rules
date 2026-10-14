@@ -1,0 +1,4 @@
+# Cezanne Scan: let members of the "scanner" group use SCREEN film scanners through
+# the SCSI generic driver (/dev/sg*), so no root rights are needed to scan.
+# After installing: sudo usermod -aG scanner $USER, then log out and in again.
+SUBSYSTEM=="scsi_generic", ATTRS{vendor}=="SCREEN*", ATTRS{model}=="FT-S*", MODE="0660", GROUP="scanner"
