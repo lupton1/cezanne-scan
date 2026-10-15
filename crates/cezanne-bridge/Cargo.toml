@@ -3,6 +3,7 @@ name = "cezanne-bridge"
 description = "Shares a SCREEN Cezanne scanner over the network so any computer (including Macs) can use it"
 version.workspace = true
 edition.workspace = true
+license.workspace = true
 publish.workspace = true
 repository.workspace = true
 authors.workspace = true

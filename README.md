@@ -171,4 +171,5 @@ analysis was done for interoperability with the owner's own scanner.
 
 ## Licence
 
-Not chosen yet. All rights reserved until a licence is added.
+MIT, see [LICENSE](LICENSE). This covers Cezanne Scan itself. SCREEN software, firmware and
+profiles are not part of this project and are not covered by it.

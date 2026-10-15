@@ -21,7 +21,6 @@ Open items for the user (see docs/STATUS.md):
 - Check the first GitHub Actions run and download the macOS and Linux installers.
 - First real hardware test: docs/hardware.md (cezanne-cli probe output).
 - Find the "FT-S5000 Driver" file on the old Mac (DS Drivers folder) for the remaining unknowns.
-- Choose a licence.
 
 Notes:
 - LOCAL BUILD: no Visual Studio on this PC. In git bash: `. C:/Users/olros/tools/cz-env.sh` then cargo.
