@@ -1,6 +1,6 @@
 # Status
 
-Version 0.2.0, October 2026.
+Version 0.2.1, October 2026.
 
 ## Verified
 

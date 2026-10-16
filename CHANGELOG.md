@@ -1,6 +1,8 @@
 # Changelog
 
-## Unreleased
+## 0.2.1 (2026-10-16)
+
+Fixes found while reviewing the documentation against the code.
 
 * Negative film types are scanned with the scanner's Positive Film type and inverted on
   the computer, matching the documented owner workflow
