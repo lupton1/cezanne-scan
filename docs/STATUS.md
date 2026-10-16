@@ -15,7 +15,8 @@ Version 0.2.2, October 2026.
 | TIFF and ICC output | unit tests and visual checks |
 | Desktop app end to end (connect, prescan, frames, scan, save) | scripted demo run against the simulator |
 | Windows installer | built locally, installed per user without admin, app and tools run, uninstalled cleanly |
-| Linux and macOS code | type checked locally for both targets, packaged by GitHub Actions |
+| macOS universal app (0.2.2) | opened by the owner on an Intel Mac with macOS 15.8 Sequoia (2026-10-16) |
+| Linux and macOS code | type checked locally for all targets, packaged by GitHub Actions |
 
 ## Confirmed from SCREEN's own driver (version 0.2.0)
 
