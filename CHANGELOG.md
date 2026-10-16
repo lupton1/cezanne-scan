@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.2 (2026-10-16)
+
+* macOS: the app is now universal and runs on Intel Macs as well as Apple Silicon (0.2.1
+  and earlier only ran on Apple Silicon). It is signed ad hoc and the minimum is macOS 10.15
+* Install instructions for macOS 15 Sequoia, which removed the right click Open shortcut
+  for apps without a Developer ID
+
 ## 0.2.1 (2026-10-16)
 
 Fixes found while reviewing the documentation against the code.

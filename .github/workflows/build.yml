@@ -45,8 +45,9 @@ jobs:
             target: x86_64-pc-windows-msvc
             formats: nsis
           - os: macos-14
-            target: aarch64-apple-darwin
-            formats: app,dmg
+            # one universal app for Intel and Apple Silicon Macs, see the macOS steps below
+            target: universal-apple-darwin
+            formats: app
           - os: ubuntu-22.04
             target: x86_64-unknown-linux-gnu
             formats: deb,appimage
@@ -55,7 +56,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
         with:
-          targets: ${{ matrix.target }}
+          targets: ${{ matrix.target == 'universal-apple-darwin' && 'aarch64-apple-darwin,x86_64-apple-darwin' || matrix.target }}
       - name: Linux libraries
         if: runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install -y libxkbcommon-dev libgl1-mesa-dev libx11-dev libxcursor-dev libxrandr-dev libxi-dev libwayland-dev libfuse2 file
@@ -66,8 +67,41 @@ jobs:
         shell: bash
         run: cargo install cargo-packager --locked --version "$PACKAGER_VERSION"
       - name: Build
+        if: runner.os != 'macOS'
         run: cargo build --release --workspace --target ${{ matrix.target }}
+      - name: Build universal macOS binaries (Intel and Apple Silicon)
+        if: runner.os == 'macOS'
+        shell: bash
+        env:
+          MACOSX_DEPLOYMENT_TARGET: "10.15"
+        run: |
+          cargo build --release --workspace --target aarch64-apple-darwin
+          cargo build --release --workspace --target x86_64-apple-darwin
+          U=target/universal-apple-darwin/release
+          mkdir -p "$U"
+          for b in cezanne-scan cezanne-cli cezanne-bridge; do
+            lipo -create -output "$U/$b" "target/aarch64-apple-darwin/release/$b" "target/x86_64-apple-darwin/release/$b"
+            lipo -info "$U/$b"
+          done
+      - name: Package macOS app, ad hoc signature and dmg
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          OUT="target/universal-apple-darwin/release"
+          cargo packager -c Packager.toml --release --target universal-apple-darwin --formats app --out-dir "$OUT"
+          APP="$OUT/Cezanne Scan.app"
+          # no Apple Developer ID: sign ad hoc so Apple Silicon Macs accept the binaries
+          codesign --force --deep --sign - "$APP"
+          codesign --verify --deep --strict --verbose=2 "$APP"
+          VERSION=$(sed -n 's/^version = "\(.*\)"/\1/p' Packager.toml | head -1)
+          STAGE=$(mktemp -d)
+          cp -R "$APP" "$STAGE/"
+          ln -s /Applications "$STAGE/Applications"
+          mkdir -p out
+          hdiutil create -volname "Cezanne Scan" -srcfolder "$STAGE" -ov -format UDZO "out/Cezanne Scan_${VERSION}_universal.dmg"
+          ls -la out
       - name: Package
+        if: runner.os != 'macOS'
         shell: bash
         run: |
           OUT="target/${{ matrix.target }}/release"
@@ -96,7 +130,7 @@ jobs:
             echo "## Downloads"
             echo
             echo "* Windows 10 and 11: the setup.exe"
-            echo "* macOS 12 or later on Apple Silicon: the .dmg (right click the app and choose Open the first time)"
+            echo "* macOS 10.15 or later, Intel or Apple Silicon: the universal .dmg. The app is not signed with a Developer ID: on macOS 15 open it once, then use System Settings, Privacy and Security, Open Anyway (on older macOS right click the app and choose Open)"
             echo "* Linux: the .deb or the .AppImage"
           } >> release-notes.md
           cat release-notes.md

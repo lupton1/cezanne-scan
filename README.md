@@ -51,11 +51,22 @@ Talking to a SCSI scanner directly needs administrator rights on Windows, so rig
 Cezanne Scan and choose **Run as administrator** when scanning with a local SCSI card. The
 simulator and the bridge client work without it.
 
-### macOS 12 and later (Apple Silicon)
+### macOS 10.15 and later (Intel and Apple Silicon)
 
-Open `Cezanne Scan_<version>_aarch64.dmg` and drag the app to Applications. The app is not
-signed with an Apple Developer ID yet, so the first time right click it and choose
-**Open**.
+Open `Cezanne Scan_<version>_universal.dmg` and drag the app to Applications. The same app
+runs on Intel Macs and on Apple Silicon (M) Macs.
+
+The app is not signed with an Apple Developer ID, so macOS blocks it the first time:
+
+* **macOS 15 Sequoia and later:** open the app once and close the warning. Then open
+  **System Settings, Privacy and Security**, scroll down to the message about Cezanne
+  Scan and click **Open Anyway**, then confirm with your password.
+* **macOS 14 and earlier:** right click the app in Applications and choose **Open**.
+* Or, in Terminal, clear the download flag once:
+
+  ```bash
+  xattr -dr com.apple.quarantine "/Applications/Cezanne Scan.app"
+  ```
 
 Current Macs have no way to drive a parallel SCSI scanner, so on a Mac Cezanne Scan
 connects through `cezanne-bridge` running on a small Linux or Windows computer that has

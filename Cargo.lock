@@ -347,7 +347,7 @@ dependencies = [
 
 [[package]]
 name = "cezanne-app"
-version = "0.2.1"
+version = "0.2.2"
 dependencies = [
  "cezanne-core",
  "eframe",
@@ -359,7 +359,7 @@ dependencies = [
 
 [[package]]
 name = "cezanne-bridge"
-version = "0.2.1"
+version = "0.2.2"
 dependencies = [
  "cezanne-core",
  "clap",
@@ -369,7 +369,7 @@ dependencies = [
 
 [[package]]
 name = "cezanne-cli"
-version = "0.2.1"
+version = "0.2.2"
 dependencies = [
  "cezanne-core",
  "clap",
@@ -380,7 +380,7 @@ dependencies = [
 
 [[package]]
 name = "cezanne-core"
-version = "0.2.1"
+version = "0.2.2"
 dependencies = [
  "libc",
  "log",

@@ -32,10 +32,19 @@ cargo packager -c Packager.toml --release --target <triple> \
 | System | Triple | Formats | Result |
 |---|---|---|---|
 | Windows | `x86_64-pc-windows-msvc` | `nsis` | `cezanne-scan_<v>_x64-setup.exe` (per user install) |
-| macOS | `aarch64-apple-darwin` | `app,dmg` | `Cezanne Scan.app` and a `.dmg` |
+| macOS | `aarch64-apple-darwin` and `x86_64-apple-darwin` | `app` | a universal `Cezanne Scan.app` and a `.dmg` (see below) |
 | Linux | `x86_64-unknown-linux-gnu` | `deb,appimage` | `.deb` with the udev rule, and an `.AppImage` |
 
 cargo-packager downloads NSIS and the AppImage tools by itself on first use.
+
+### macOS universal app
+
+The macOS release runs on both Intel and Apple Silicon Macs. The workflow builds both
+targets with `MACOSX_DEPLOYMENT_TARGET=10.15`, joins each program with `lipo` into
+`target/universal-apple-darwin/release`, packages the app with
+`--target universal-apple-darwin --formats app`, signs it ad hoc
+(`codesign --force --deep --sign -`, needed for Apple Silicon without a Developer ID) and
+makes the `.dmg` with `hdiutil`.
 
 ## Continuous integration
 
