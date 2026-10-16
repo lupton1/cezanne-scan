@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.3.0 (2026-10-16)
 
 * macOS: direct connection to a scanner on a SCSI card through IOKit's SCSI task
   interface (choose This computer). Not yet tested on hardware. The bridge remains the
