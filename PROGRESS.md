@@ -4,7 +4,7 @@ Lock: 2026-10-15T08:55:00+11:00 (main interactive session)
 
 ALL PHASES DONE
 
-Phase: 7 - complete (v0.1.0)
+Phase: 7 - complete (v0.2.0 released 2026-10-16)
 
 Done:
 - Reverse engineering: firmware (SH-2) SCSI dispatcher, window layout, SEND types, vendor
@@ -20,7 +20,7 @@ Done:
 Open items for the user (see docs/STATUS.md):
 - Check the first GitHub Actions run and download the macOS and Linux installers.
 - First real hardware test: docs/hardware.md (cezanne-cli probe output).
-- Find the "FT-S5000 Driver" file on the old Mac (DS Drivers folder) for the remaining unknowns.
+- (done 0.2.0) FT-S5000 Driver analysed: window bytes now match ColorGeniusEX. Driver files in vendor/drivers.
 
 Notes:
 - LOCAL BUILD: no Visual Studio on this PC. In git bash: `. C:/Users/olros/tools/cz-env.sh` then cargo.

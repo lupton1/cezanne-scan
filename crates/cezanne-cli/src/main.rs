@@ -3,7 +3,7 @@
 use cezanne_core::connect::Connection;
 use cezanne_core::image::{icc, tiff, Adjustments, FilmType};
 use cezanne_core::preset::Preset;
-use cezanne_core::protocol::{AreaUnit, ColorMode, LightSource, ScanArea, WindowSettings};
+use cezanne_core::protocol::{AreaUnit, ColorMode, ScanArea, WindowSettings};
 use cezanne_core::scanner::Scanner;
 use cezanne_core::scsi;
 use clap::{Args, Parser, Subcommand, ValueEnum};
@@ -203,7 +203,7 @@ fn scan(a: ScanArgs) -> cezanne_core::Result<()> {
         Mode::Rgb48 => ColorMode::Rgb48,
     };
     let mut ws = WindowSettings::new(a.area, a.dpi, mode);
-    ws.light = if film == FilmType::Reflective { LightSource::Reflective } else { LightSource::Transmissive };
+    ws.original = film.original();
     ws.area_unit = match a.area_unit {
         Unit::TenthMm => AreaUnit::TenthMm,
         Unit::Inch1200 => AreaUnit::Inch1200,

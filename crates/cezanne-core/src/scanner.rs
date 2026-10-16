@@ -186,7 +186,9 @@ impl Scanner {
 
     /// Low resolution scan of an area for the preview.
     pub fn preview(&mut self, settings: &WindowSettings, progress: Progress<'_>, cancel: &AtomicBool) -> Result<RawImage> {
-        self.scan(settings, progress, cancel)
+        let mut s = settings.clone();
+        s.preview = true;
+        self.scan(&s, progress, cancel)
     }
 
     /// Read only identification and stored windows. Safe to run on a real scanner at any time.

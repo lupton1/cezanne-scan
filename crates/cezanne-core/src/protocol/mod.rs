@@ -8,7 +8,7 @@ pub mod window;
 
 pub use gamma::GammaTable;
 pub use inquiry::Inquiry;
-pub use window::{AreaUnit, ColorMode, Geometry, LightSource, ScanArea, WindowDescriptor, WindowSettings};
+pub use window::{AreaUnit, ColorMode, Geometry, LightSource, OriginalType, ScanArea, WindowDescriptor, WindowSettings};
 
 /// Read a big endian 24 bit length field, as used in CDB bytes 6 to 8.
 pub fn be24(b: &[u8]) -> u32 {

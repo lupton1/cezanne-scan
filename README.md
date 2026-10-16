@@ -10,9 +10,9 @@ with no SCREEN software installed.
 
 ![Cezanne Scan running against the built in simulator](docs/images/app-simulator.png)
 
-> **Status:** the software is complete and fully tested against a simulated FT-S5000, but it
-> has **not yet been run on a real scanner**. Two unit conventions still need a first test
-> on real hardware. See [docs/STATUS.md](docs/STATUS.md) and the first test steps in
+> **Status:** the software is complete and fully tested against a simulated FT-S5000. Its
+> scan commands match SCREEN's own driver byte for byte, but it has **not yet been run on a
+> real scanner**. See [docs/STATUS.md](docs/STATUS.md) and the first test steps in
 > [docs/hardware.md](docs/hardware.md).
 
 ## Features
@@ -38,8 +38,8 @@ with no SCREEN software installed.
 
 ## Install
 
-Installers are built by GitHub Actions (see [Building](#building)). Download them from the
-Actions run artifacts or from a draft release.
+Download the installer for your system from the
+[Releases page](https://github.com/lupton1/cezanne-scan/releases).
 
 ### Windows 10 and 11
 
@@ -160,11 +160,12 @@ Full details, including building on Windows without Visual Studio, are in
 ## How it was made
 
 The FT-S5000 Maintainer tool (Java) and its native driver shim showed the shape of the
-host software. They also showed that the real SCSI code lives in a separate "FT-S5000
-Driver" file that was not available. The scanner firmware (`FT-S5000_V2.12.jfirm`) turned
-out to be an LHA archive of Hitachi SH-2 code. Decompiling it gave the complete SCSI
-command dispatcher, the window descriptor validation and the data formats. The details are
-in [docs/protocol.md](docs/protocol.md) and [docs/architecture.md](docs/architecture.md).
+host software. The scanner firmware (`FT-S5000_V2.12.jfirm`) turned out to be an LHA archive
+of Hitachi SH-2 code. Decompiling it gave the complete SCSI command dispatcher, the window
+descriptor validation and the data formats. SCREEN's host driver ("FT-S5000 Driver" 2.1.3,
+which still carries its debug function names) then confirmed exactly which bytes
+ColorGeniusEX sends. The details are in [docs/protocol.md](docs/protocol.md) and
+[docs/architecture.md](docs/architecture.md).
 
 No SCREEN code, firmware, profiles or other files are included in this repository. The
 analysis was done for interoperability with the owner's own scanner.

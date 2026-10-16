@@ -2,7 +2,7 @@ name: build
 
 # Tests run on every push to main (Linux only, cheap).
 # Installers for Windows, macOS and Linux are built when:
-#   * a tag starting with v is pushed (also creates a DRAFT GitHub release), or
+#   * a tag starting with v is pushed (also publishes a GitHub release with the installers), or
 #   * the workflow is started by hand (Actions tab, Run workflow), or
 #   * a commit message on main contains [package].
 # Private repositories pay for Actions minutes (macOS minutes count ten times),
@@ -86,11 +86,27 @@ jobs:
     needs: package
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+      - name: Release notes from the changelog
+        shell: bash
+        run: |
+          awk -v v="${GITHUB_REF_NAME#v}" '$0 ~ "^## "v" " {p=1; next} /^## / && p {exit} p' CHANGELOG.md > release-notes.md
+          {
+            echo
+            echo "## Downloads"
+            echo
+            echo "* Windows 10 and 11: the setup.exe"
+            echo "* macOS 12 or later on Apple Silicon: the .dmg (right click the app and choose Open the first time)"
+            echo "* Linux: the .deb or the .AppImage"
+          } >> release-notes.md
+          cat release-notes.md
       - uses: actions/download-artifact@v4
         with:
           path: artifacts
           merge-multiple: true
       - uses: softprops/action-gh-release@v2
         with:
-          draft: true
+          draft: false
+          name: Cezanne Scan ${{ github.ref_name }}
+          body_path: release-notes.md
           files: artifacts/*

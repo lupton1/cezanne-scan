@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.2.0 (2026-10-16)
+
+Window descriptors now match SCREEN's own driver byte for byte.
+
+* Analysed "FT-S5000 Driver" 2.1.3 (the host driver ColorGeniusEX uses). Confirmed the
+  0.1 mm area unit and the dpi times 10 resolution fields
+* Width and length are no longer sent, the scanner derives the extent from pixels and
+  resolution, as with the original driver
+* Added the constant vendor bytes, prescan and scan modes, lookup table selectors and lamp
+  selection for each original type (positive film, negative film, photograph, printed
+  material, watercolor)
+* Fixed byte 142, which is the original class and not a gamma slot
+* SET WINDOW header now carries the window data length like the driver's
+* Window IDs start at 1, pixel counts round down so a scan never runs past its area
+* MIT licence
+* Releases are published with installers for Windows, macOS and Linux
+
 ## 0.1.0 (2026-10-15)
 
 First version.

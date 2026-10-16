@@ -37,9 +37,9 @@ it is different from the card (usually ID 7) and any other device on the bus.
 
 ## First test on real hardware
 
-The protocol was decoded from the firmware, and two unit conventions could not be confirmed
-without the scanner (see [STATUS.md](STATUS.md)). These steps are all safe. Nothing here
-writes to the scanner's memory.
+The protocol is known from the scanner firmware and from SCREEN's own driver (see
+[STATUS.md](STATUS.md)). These steps are all safe. Nothing here writes to the scanner's
+memory.
 
 1. Power the scanner on, wait for it to finish its start up, then start the computer.
 2. Find it:
@@ -60,18 +60,13 @@ writes to the scanner's memory.
    cezanne-cli scan --area 0,0,50,50 --dpi 300 --raw -o test-corner.tif
    ```
 
-   The file should be 591 by 591 pixels and show the top left corner of the bed.
+   The file should be 590 by 590 pixels and show the top left corner of the bed.
 
 5. Put a ruler on the glass and scan a known area, for example `--area 0,0,100,20`. The
-   picture should show 100 mm of the ruler. If it shows a different length, note it down.
-   0.1 mm units are very likely (the other common unit, 1/1200 inch, would make the bed
-   only 72 mm wide), but if the picture covers only about 21 mm, repeat with
-   `--area-unit inch1200`.
-6. If the scanner rejects every window, or the image is stretched, try
-   `--res-scale 1` and `--res-scale 100`.
+   picture should show 100 mm of the ruler.
 
-Whatever setting turns out right can be set in the app under **Advanced (hardware
-calibration)** and will become the default in the next release.
+The **Advanced (hardware calibration)** settings in the app (area unit and resolution
+field scale) are diagnostic options only. The defaults match SCREEN's driver.
 
 ## Never do this
 

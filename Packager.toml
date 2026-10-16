@@ -5,7 +5,7 @@
 #   cargo packager --release --formats deb,appimage (Linux)
 name = "cezanne-scan"
 product-name = "Cezanne Scan"
-version = "0.1.0"
+version = "0.2.0"
 identifier = "com.lupton1.cezanne-scan"
 description = "Scanning software for the SCREEN Cezanne FT-S5000 film scanner"
 long-description = "A modern replacement for ColorGeniusEX: prescan, frame selection, HD and SD density controls, curves and 16 bit TIFF output. Includes a network bridge so Macs without SCSI can use a scanner attached to another computer."

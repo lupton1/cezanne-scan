@@ -363,8 +363,10 @@ pub fn render_line(desc: &WindowDescriptor, g: &Geometry, line: u32) -> Vec<u8> 
     let per_mm = AreaUnit::TenthMm.units_per_mm();
     let x0 = desc.upper_left_x() as f64 / per_mm;
     let y0 = desc.upper_left_y() as f64 / per_mm;
-    let w = desc.width() as f64 / per_mm;
-    let h = desc.length() as f64 / per_mm;
+    // like the real scanner, the extent follows from pixel count and resolution
+    let (ew, eh) = desc.extent();
+    let w = ew as f64 / per_mm;
+    let h = eh as f64 / per_mm;
     let y = y0 + (line as f64 + 0.5) / g.lines as f64 * h;
     let mut out = Vec::with_capacity(g.bytes_per_line());
     let channels = g.mode.channels();
@@ -431,9 +433,9 @@ mod tests {
         let mut s = Simulator::ready();
         let ws = WindowSettings::new(ScanArea::new(30.0, 30.0, 20.0, 10.0), 300.0, ColorMode::Rgb48);
         let (d, g) = WindowDescriptor::build(&ws).unwrap();
-        let p = parameter_list(&[d]);
+        let p = parameter_list(&[d.clone()]);
         assert_eq!(exec(&mut s, &cdb::set_window(p.len() as u32), DataPhase::Out(&p)).status, 0);
-        assert_eq!(exec(&mut s, &cdb::scan(1), DataPhase::Out(&[0])).status, 0);
+        assert_eq!(exec(&mut s, &cdb::scan(1), DataPhase::Out(&[d.window_id()])).status, 0);
         let mut total = 0;
         let mut buf = vec![0u8; 4096];
         loop {

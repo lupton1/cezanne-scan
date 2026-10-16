@@ -39,6 +39,16 @@ impl FilmType {
     }
 
     pub const ALL: [FilmType; 4] = [FilmType::Positive, FilmType::ColorNegative, FilmType::BwNegative, FilmType::Reflective];
+
+    /// The scanner's original type for this film (selects lamp and lookup tables).
+    pub fn original(self) -> crate::protocol::OriginalType {
+        use crate::protocol::OriginalType;
+        match self {
+            FilmType::Positive => OriginalType::PositiveFilm,
+            FilmType::ColorNegative | FilmType::BwNegative => OriginalType::NegativeFilm,
+            FilmType::Reflective => OriginalType::Photograph,
+        }
+    }
 }
 
 /// A tone curve through control points in 0..1, evaluated as a monotone cubic.

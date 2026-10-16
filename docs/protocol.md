@@ -1,8 +1,13 @@
 # FT-S5000 SCSI protocol
 
-Status: work in progress. Derived from static analysis of the scanner firmware
-(FT-S5000 V2.12, Hitachi SH-2) and the FT-S5000 Maintainer tool. No SCREEN code is
-reproduced here, only the observed interface.
+Derived from static analysis of three SCREEN components that agree with each other:
+
+* the scanner firmware (FT-S5000 V2.12, Hitachi SH-2), which shows what the scanner accepts
+* the host driver "FT-S5000 Driver" 2.1.3 (PowerPC, with debug function names), which
+  shows exactly what ColorGeniusEX sends
+* the FT-S5000 Maintainer tool (Java)
+
+No SCREEN code is reproduced here, only the observed interface.
 
 ## Architecture
 
@@ -15,9 +20,10 @@ The scanner has two main processors.
   to it over an internal serial link (STX/ETX framing with ACK/NAK). The Maintainer's
   `SendJOANACommand` tunnels raw JOANA commands through SCSI.
 
-The host side SCSI code lives in a CFM driver called `FT-S5000 Driver` (loaded from a
-`DS Drivers` folder). It is not part of the material we have, so this document is built
-from the firmware (target side).
+On the Mac the host side lives in `/Library/Application Support/SCREEN/DS Drivers/FT-S5000
+Driver`, a CFM bundle that ColorGeniusEX, its Server and the Maintainer all load by
+function name. It talks SCSI through a `CarbonSCSI` helper bundle. Its configuration file
+`FT-S5000 Config` sets a lamp warm up of 180 seconds and a maximum READ size of 512 KB.
 
 ## Identity (INQUIRY)
 
@@ -83,55 +89,80 @@ specific. Codes seen in the firmware:
 * Window IDs 0 to 199 are accepted. A descriptor is stored only after it passes
   validation, otherwise SET WINDOW fails with 5/26/02.
 
+### Parameter list header
+
+| Bytes | Value |
+|---|---|
+| 0 and 1 | window data length: descriptors times 176 plus 6 |
+| 2 to 5 | zero |
+| 6 and 7 | descriptor length, 176 |
+
 ### Window descriptor (176 bytes)
 
-Offsets are from the start of the descriptor. Confidence: **high** means the firmware
-reads the field with that size and meaning is clear from context. **medium** means size
-and use are known but units are inferred. **low** means only that the firmware reads it.
+Offsets are from the start of the descriptor. "Driver" means the value is what SCREEN's
+driver writes (function `SetJobToDevice`), "firmware" means what the scanner checks or
+reads. Every byte not listed is zero in the driver's windows.
 
-| Offset | Size | Field | Confidence | Notes |
+| Offset | Size | Field | Driver writes | Notes |
 |---|---|---|---|---|
-| 0 | 1 | window ID | high | |
-| 2 | 2 | X resolution (SCSI-2 standard slot) | low | not read by the scan engine |
-| 4 | 2 | Y resolution (SCSI-2 standard slot) | low | not read by the scan engine |
-| 6 | 4 | upper left X | high | validated `0 <= ULX` and `ULX + width <= 3420` |
-| 10 | 4 | upper left Y | high | validated `ULY + length <= 5310` |
-| 14 | 4 | width | medium | |
-| 18 | 4 | length | medium | |
-| 29 | 1 | flags, bit 7 used | low | |
-| 44 | 1 | original type selector | medium | checked by a model specific validator |
-| 45 | 1 | scan flags (bit 0, bit 1, values 0x11 to 0x13 special) | low | bit 0 forces a 10 line mode, bit 1 doubles a speed factor |
-| 46 | 2 | X resolution, dots per inch | medium | max 12000 |
-| 48 | 2 | Y resolution, dots per inch | medium | used for the line count |
-| 50 | 1 | image composition | high | 2 = grey, 5 = RGB (SCSI-2 codes) |
-| 51 | 1 | bits per pixel | high | 16 = 16 bit grey, 48 = 16 bit RGB (8 bit values also accepted) |
-| 54 | 4 | magnification or output resolution X | medium | range per model, FT-S5000 200 to 120000 |
-| 58 | 4 | magnification or output resolution Y | medium | same range |
-| 63 to 65 | 1 each | per channel parameter R, G, B | low | passed to a per channel setup routine |
-| 66 | 2 | | low | |
-| 70 | 2 | | low | |
-| 132 | 1 | enable flag | low | |
-| 133, 135, 136, 137 | 1 each | | low | 137 bits 0 and 1 select a table bank |
-| 138, 140 | 2 each | | low | |
-| 142 | 1 | gamma table selector | medium | index into downloaded gamma slots |
-| 144 | 1 | light source | medium | 0 = transmissive lamp, 1 = reflective lamp, 2 = none |
-| 149 | 1 | | low | |
-| 154, 156, 158 | 2 each | | low | |
-| 160 | 1 | | low | |
+| 0 | 1 | window ID | 1 to 99, cycling | firmware accepts 0 to 199 |
+| 6 | 4 | upper left X | 0.1 mm | firmware limit: X plus extent at most 3420 |
+| 10 | 4 | upper left Y | 0.1 mm | firmware limit: Y plus extent at most 5310 |
+| 14, 18 | 4 each | SCSI-2 width and length | 0 | the scanner derives the extent from pixels and resolution |
+| 23 | 1 | threshold | line art only | |
+| 29 | 1 | flags | 0x80 for some separation types | |
+| 41 to 43 | 3 | constants | 2, 100, 0x20 | always |
+| 45 | 1 | scan mode | 1 prescan, 2 normal scan | 6, 7, 8 line art, 0x10 or more slow down modes |
+| 46 | 2 | pixels per line | from the job | firmware maximum 12000 |
+| 48 | 2 | lines | from the job | |
+| 50 | 1 | image composition | 2 grey, 5 colour, 0 line art | |
+| 51 | 1 | bits per pixel | 8, 16, 24, 48 | firmware picks 1, 2, 3 or 6 bytes per pixel |
+| 54 | 4 | X resolution | dpi times 10 times magnification | firmware range 200 to 120000 (FT-S3000 66000) |
+| 58 | 4 | Y resolution | same | |
+| 62 to 65 | 4 | lookup table selectors | per original type, see below | |
+| 66 to 71 | 6 | filter parameters | zero unless a median or defocus filter is on | |
+| 132 | 1 | filter on | 0 or 1 | |
+| 133 to 141 | | filter and sharpening parameters | from `FT-S5000 Config` | |
+| 142 | 1 | original class | 2 reflective, 0 film | 1 and 4 for factory calibration types |
+| 144 | 1 | light source | 1 reflective lamp, 0 transmission lamp | firmware switches lamps on this byte |
+| 149 | 1 | focus mode | 0 prescan, 1 or 3 with auto focus | |
+| 154 to 159 | | focus offsets | from the driver's focus calculation | |
+| 160 | 1 | | 0 or 1 from a job option | |
 
-The 3420 by 5310 limits match a bed of about 342 by 531 mm in 0.1 mm units, which is
-the working assumption until confirmed on hardware.
+The bed limits (3420 by 5310 in 0.1 mm) give a bed of 342 by 531 mm. The extent of a
+window is pixels divided by (resolution field / 10) inches.
+
+### Original types
+
+The driver offers 12 original types. Bit 0x80 of the type code marks a reflective
+original. The continuous tone types and their lookup table selector strings (a string
+`d0 d1 d2 d3 d4` is packed into bytes 62 to 65 as `d2, d0, d4, d3 * 16 + d1`):
+
+| Type | Light | Colour output | Grey output |
+|---|---|---|---|
+| Positive Film | transmission | `11003` | `11006` |
+| Negative Film | transmission | `11005` | `11005` |
+| Photograph | reflective | `22004` | `22004` |
+| Printed Material | reflective | `22004` | `22004` |
+| Watercolor | reflective | `22004` | `22004` |
+
+The other types are three line art types and four colour separation types.
 
 ## SCAN (0x1B)
 
 CDB byte 4 is the number of window IDs that follow (max 100). The data out phase is the
-list of window IDs. Each must be defined by SET WINDOW, otherwise 5/26/02.
+list of window IDs. Each must be defined by SET WINDOW, otherwise 5/26/02. The driver
+always sends one window: RESERVE, SET WINDOW, SCAN, READ until done, RELEASE. While the
+lamp warms up SCAN fails with NOT READY 04/80, and the driver reads the remaining warm up
+time with vendor command 0xCA (function 3, sub function 0x100 transmission or 0x101
+reflective).
 
 ## READ(10) (0x28)
 
 Returns image data for the active scan. CDB bytes 6 to 8 are the transfer length. The
 firmware keeps a count of bytes remaining (lines times bytes per line, computed from the
-window) and the host should read exactly that many bytes in total.
+window) and the host should read exactly that many bytes in total. The driver reads up
+to 512 KB per command.
 
 ## SEND(10) (0x2A)
 
@@ -150,8 +181,8 @@ CDB byte 2 is the data type code, byte 5 the qualifier, bytes 6 to 8 the length.
 
 | Opcode | Direction | Purpose |
 |---|---|---|
-| `0xC8` | in | vendor READ. Byte 2 type (`0x80` CCD or DSP data, `0x03` gamma, `0x84` matrix), bytes 4 and 5 qualifier, byte 3 bit 0 continues a chunked transfer |
-| `0xC9` | out | maintenance write (function code in the first data word). Not used |
-| `0xCA` | in | maintenance read (function code in CDB bytes 2 and 3). Diagnostics only |
+| `0xC8` | in | Receive. Byte 2 type (`0x80` CCD or DSP data, `0x03` gamma, `0x84` matrix), bytes 4 and 5 qualifier, byte 3 bit 0 continues a chunked transfer |
+| `0xC9` | out | IO Set: maintenance write (function code in the first data word). Not used |
+| `0xCA` | in | IO Sense: maintenance read (function in CDB bytes 2 and 3, sub function in 4 and 5). Function 3 reports lamp warm up |
 | `0xCB` | none | waits for the mechanics to finish the current move |
-| `0xCE` | in | 6 byte status block |
+| `0xCE` | in | Test Scan Ready: 6 byte scan status block |

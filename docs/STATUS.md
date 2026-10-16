@@ -1,6 +1,6 @@
 # Status
 
-Version 0.1.0, October 2026.
+Version 0.2.0, October 2026.
 
 ## Verified
 
@@ -15,34 +15,35 @@ Version 0.1.0, October 2026.
 | Windows installer | built locally, installed per user without admin, app and tools run, uninstalled cleanly |
 | Linux and macOS code | type checked locally for both targets, packaged by GitHub Actions |
 
+## Confirmed from SCREEN's own driver (version 0.2.0)
+
+The FT-S5000 Driver 2.1.3 from the original Mac installation was analysed and the window
+builder now writes the same bytes as ColorGeniusEX:
+
+* scan area offsets are in 0.1 mm
+* the resolution fields are dpi times 10
+* width and length are left at zero, the scanner derives the extent from pixel count and
+  resolution
+* the constant bytes, scan mode, lookup table selectors and lamp selection per original
+  type
+* the SET WINDOW, SCAN and READ command layouts, which were already right
+
 ## Not yet verified
 
-**Nothing has run on a real FT-S5000 yet.** The firmware analysis gives the command set,
-data formats and validation rules with good confidence. These points still need the real
-scanner:
+**Nothing has run on a real FT-S5000 yet.** The protocol is now known from both sides
+(firmware and SCREEN's driver), so the remaining risk is mostly in the hardware path:
 
-1. **Area unit.** The firmware limits (3420 by 5310) fit a bed of about 342 by 531 mm in
-   0.1 mm units, which is very likely right. 1/1200 inch, the SCSI-2 default, would make
-   the bed only 72 mm wide. Switchable in the app and CLI just in case.
-2. **Resolution field scale.** The 32 bit resolution fields accept 200 to 120000, read as
-   dpi times 10. Switchable.
-3. **Vendor window fields** that the firmware reads but whose meaning is unclear (see the
-   table in protocol.md). They are sent as zero, which the firmware accepts.
-4. **Gamma table format** for the 8 bit modes. Cezanne Scan does not download gamma tables
-   by default and scans in 16 bit.
-5. **Windows SPTI** access to a scanner on a SCSI card. The code follows the documented
-   interface but has not seen a real device.
+1. **SCSI card and transport.** Linux SG_IO and Windows SPTI follow their documented
+   interfaces but have not seen this scanner.
+2. **Focus.** The driver computes per scan focus offsets (bytes 149 to 159). Cezanne Scan
+   sends zero there, which is what the driver does for a prescan, so the scanner uses its
+   default focus. Automatic focus can be added once real scans can be compared.
+3. **Filters and sharpening in the scanner** (bytes 66 to 71 and 132 to 141) are left off.
+   Sharpening is done on the computer instead.
+4. **Gamma tables** for the 8 bit modes are not downloaded. Scan in 16 bit.
 
-The first test steps are in [hardware.md](hardware.md).
-
-## What would help most
-
-* The output of `cezanne-cli probe` from the real scanner.
-* The file **"FT-S5000 Driver"** from the old Mac. It is the SCREEN driver that
-  ColorGeniusEX uses and holds the exact window values the original software sends. It
-  lives in a folder called **DS Drivers** (look in `/Library`, `~/Library` and the System
-  Folder). It was not part of the archive used so far. It would stay outside the
-  repository like the other SCREEN files.
+The first test steps are in [hardware.md](hardware.md). The output of `cezanne-cli probe`
+from the real scanner is still the most useful thing to have.
 
 ## Continuous integration
 

@@ -362,7 +362,7 @@ impl App {
 
     fn window_for(&self, area: ScanArea, dpi: f64) -> WindowSettings {
         let mut ws = WindowSettings::new(area, dpi, self.s.mode);
-        ws.light = self.s.light;
+        ws.original = self.s.film.original();
         ws.area_unit = self.s.area_unit;
         ws.resolution_scale = self.s.res_scale;
         ws
@@ -486,11 +486,11 @@ impl App {
                 ui.selectable_value(&mut self.s.film, f, f.label());
             }
         });
-        ui.horizontal(|ui| {
-            ui.label("Light");
-            ui.selectable_value(&mut self.s.light, LightSource::Transmissive, "Film");
-            ui.selectable_value(&mut self.s.light, LightSource::Reflective, "Print");
-        });
+        ui.weak(format!(
+            "Scanner original type: {} ({} lamp)",
+            self.s.film.original().label(),
+            if self.s.film.original().light() == LightSource::Reflective { "reflective" } else { "transmission" }
+        ));
 
         ui.separator();
         ui.heading("Scan");
