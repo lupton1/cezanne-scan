@@ -425,9 +425,7 @@ impl App {
         ui.heading("Scanner");
         ui.horizontal(|ui| {
             ui.selectable_value(&mut self.s.conn_kind, ConnKind::Simulator, "Simulator");
-            if !cfg!(target_os = "macos") {
-                ui.selectable_value(&mut self.s.conn_kind, ConnKind::Local, "This computer");
-            }
+            ui.selectable_value(&mut self.s.conn_kind, ConnKind::Local, "This computer");
             ui.selectable_value(&mut self.s.conn_kind, ConnKind::Bridge, "Bridge");
         });
         match self.s.conn_kind {
@@ -435,6 +433,9 @@ impl App {
                 ui.weak("A virtual FT-S5000 with test film on the bed.");
             }
             ConnKind::Local => {
+                if cfg!(target_os = "macos") {
+                    ui.weak("Needs a SCSI card with a macOS driver (for example ATTO in a Thunderbolt enclosure). Otherwise use Bridge.");
+                }
                 ui.horizontal(|ui| {
                     ui.label("Device");
                     ui.add(egui::TextEdit::singleline(&mut self.s.local_device).hint_text("automatic"));

@@ -15,7 +15,7 @@ Scan directly needs:
 |---|---|
 | **Linux** | The most reliable choice. PCIe cards based on the LSI 53C1030 (for example LSI20320IE, driver `mptspi`) or Adaptec AIC-79xx (29320LPE, driver `aic79xx`) work with current kernels. Older PCI Adaptec 29160 and 29160N cards (driver `aic7xxx`) also work in machines with a PCI slot. Cezanne owners have used the Adaptec 29160N with this scanner. |
 | **Windows 10 and 11** | Possible but less certain. Check that a 64 bit driver exists for the exact card before buying. Running Cezanne Scan as administrator is required for direct SCSI access. |
-| **macOS** | Current Macs cannot drive this scanner directly. Use a small Linux computer with a SCSI card as a bridge, see [Using a Mac](../README.md#using-a-mac) in the README. |
+| **macOS** | Possible with a SCSI card that has a driver for your macOS version, usually an ATTO Ultra320 or Ultra160 card in a Thunderbolt PCIe enclosure on an Intel Mac. Apple Silicon Macs are unlikely to find a working driver. Cezanne Scan talks to the scanner through IOKit (see [Using a Mac](../README.md#using-a-mac)). The alternative is a small Linux computer with a SCSI card as a bridge. |
 
 A small Linux box with a PCIe slot, or an old desktop, makes a good dedicated bridge for a
 Mac. Any distribution with a recent kernel will do.

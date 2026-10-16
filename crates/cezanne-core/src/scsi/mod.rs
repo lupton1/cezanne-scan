@@ -9,6 +9,8 @@ pub mod tcp;
 
 #[cfg(target_os = "linux")]
 pub mod linux_sg;
+#[cfg(target_os = "macos")]
+pub mod macos_iokit;
 #[cfg(windows)]
 pub mod windows_spti;
 
@@ -147,7 +149,11 @@ pub fn discover() -> Result<Vec<DeviceInfo>> {
     {
         windows_spti::discover()
     }
-    #[cfg(not(any(target_os = "linux", windows)))]
+    #[cfg(target_os = "macos")]
+    {
+        macos_iokit::discover()
+    }
+    #[cfg(not(any(target_os = "linux", windows, target_os = "macos")))]
     {
         Err(Error::Unsupported(
             "this OS has no direct SCSI access, connect through cezanne-bridge".into(),
@@ -165,7 +171,11 @@ pub fn open_local(address: &str) -> Result<Box<dyn Transport>> {
     {
         Ok(Box::new(windows_spti::SptiTransport::open(address)?))
     }
-    #[cfg(not(any(target_os = "linux", windows)))]
+    #[cfg(target_os = "macos")]
+    {
+        Ok(Box::new(macos_iokit::IoKitTransport::open(address)?))
+    }
+    #[cfg(not(any(target_os = "linux", windows, target_os = "macos")))]
     {
         let _ = address;
         Err(Error::Unsupported(

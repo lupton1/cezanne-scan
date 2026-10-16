@@ -1,7 +1,7 @@
 //! `cezanne-bridge`: share one SCREEN scanner over the network.
 //!
 //! Run it on the computer with the SCSI card (Linux or Windows). Cezanne Scan on any
-//! other computer, including current Macs which have no SCSI support, connects to it.
+//! other computer, including Macs without a usable SCSI card, connects to it.
 //! One client is served at a time. Firmware and EEPROM writes are always refused.
 
 use cezanne_core::connect::Connection;

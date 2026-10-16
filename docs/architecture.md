@@ -14,8 +14,8 @@
            |
          scsi::Transport
    +-------+--------+-----------+-------------+
-   | linux_sg       | windows   | tcp         | sim
-   | SG_IO ioctl    | SPTI      | bridge      | simulated FT-S5000
+   | linux_sg     | windows   | macos_iokit   | tcp       | sim
+   | SG_IO ioctl  | SPTI      | SCSITaskLib   | bridge    | simulated FT-S5000
 ```
 
 ## Layers
@@ -28,6 +28,10 @@ same on every system.
 * `windows_spti` uses the SCSI Pass Through Interface on the adapter (`\\.\ScsiN:`) with
   an explicit path, target and LUN, and discovers devices with IOCTL_SCSI_GET_INQUIRY_DATA
   so discovery sends nothing to the devices.
+* `macos_iokit` opens the scanner through IOKit's SCSITaskDeviceInterface. macOS
+  publishes SCSI devices it has no driver for (scanners included) as
+  `SCSITaskUserClientDevice` nubs, which an application can open with exclusive access.
+  Addresses look like `iokit:<registry entry id>`.
 * `tcp` is the client and server for `cezanne-bridge`. The wire format is documented in
   the module.
 * `sim` answers the FT-S5000 command set with the firmware's validation rules and renders

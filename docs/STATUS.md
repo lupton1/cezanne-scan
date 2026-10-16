@@ -36,8 +36,10 @@ builder now writes the same bytes as ColorGeniusEX:
 **Nothing has run on a real FT-S5000 yet.** The protocol is now known from both sides
 (firmware and SCREEN's driver), so the remaining risk is mostly in the hardware path:
 
-1. **SCSI card and transport.** Linux SG_IO and Windows SPTI follow their documented
-   interfaces but have not seen this scanner.
+1. **SCSI card and transport.** Linux SG_IO, Windows SPTI and macOS IOKit
+   (SCSITaskDeviceInterface) follow their documented interfaces but have not seen this
+   scanner. On macOS the main question is a SCSI card with a driver for the macOS version
+   in use.
 2. **Focus.** The driver computes per scan focus offsets (bytes 149 to 159). Cezanne Scan
    sends zero there, which is what the driver does for a prescan, so the scanner uses its
    default focus. Automatic focus can be added once real scans can be compared.

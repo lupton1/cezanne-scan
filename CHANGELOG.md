@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+* macOS: direct connection to a scanner on a SCSI card through IOKit's SCSI task
+  interface (choose This computer). Not yet tested on hardware. The bridge remains the
+  option for Macs without a usable SCSI card
+
 ## 0.2.2 (2026-10-16)
 
 * macOS: the app is now universal and runs on Intel Macs as well as Apple Silicon (0.2.1

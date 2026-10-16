@@ -30,7 +30,8 @@ talks to the scanner directly with no SCREEN software installed.
 * Live densitometer readout under the mouse
 * Presets, including the two black and white negative methods shared on the Large Format
   Photography forum
-* `cezanne-bridge` shares the scanner over the network, which is how a Mac uses it
+* Direct SCSI on Windows, Linux and macOS, or `cezanne-bridge` to share the scanner over
+  the network
 * `cezanne-cli` for scripted scans and diagnostics
 * A built in simulated scanner, so everything can be tried without hardware
 * Safety: commands that write firmware or factory settings into the scanner are blocked in
@@ -68,9 +69,10 @@ The app is not signed with an Apple Developer ID, so macOS blocks it the first t
   xattr -dr com.apple.quarantine "/Applications/Cezanne Scan.app"
   ```
 
-Current Macs have no way to drive a parallel SCSI scanner, so on a Mac Cezanne Scan
-connects through `cezanne-bridge` running on a small Linux or Windows computer that has
-the SCSI card. See [Using a Mac](#using-a-mac).
+A Mac can drive the scanner directly when it has a SCSI card with a macOS driver (for
+example an ATTO card in a Thunderbolt PCIe enclosure on an Intel Mac). Otherwise it
+connects through `cezanne-bridge` on a small Linux or Windows computer with the SCSI card.
+See [Using a Mac](#using-a-mac).
 
 ### Linux
 
@@ -119,7 +121,18 @@ Tips from Cezanne owners, built into the presets:
 
 ## Using a Mac
 
-On the computer with the SCSI card (Linux or Windows):
+There are two ways.
+
+**Directly.** With a SCSI card that has a macOS driver, connect the scanner, choose
+**This computer** in Cezanne Scan and press **Connect**. macOS has no driver of its own
+for SCSI scanners, so Cezanne Scan opens the scanner through IOKit's SCSI task interface,
+the same route SANE uses. Cards are the hard part: parallel SCSI cards with drivers for
+recent macOS are rare (ATTO is the usual choice on Intel Macs, in a Thunderbolt PCIe
+enclosure), and on Apple Silicon a working driver is unlikely. Check driver support for
+your exact card and macOS version before buying. This path has not been tested on
+hardware yet.
+
+**Through the bridge.** On a computer with a SCSI card (Linux or Windows):
 
 ```bash
 cezanne-bridge --listen 0.0.0.0:7810 --token choose-a-secret

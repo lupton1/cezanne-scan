@@ -1,7 +1,7 @@
 //! SCSI over TCP, used to reach a scanner attached to another computer.
 //!
 //! `cezanne-bridge` runs next to the SCSI card and serves one scanner. Any Cezanne Scan
-//! build (and the only option on macOS) connects with [`TcpTransport`].
+//! build connects with [`TcpTransport`], which is the usual route for Macs without a SCSI card.
 //!
 //! Wire format, all integers big endian:
 //!
