@@ -487,9 +487,10 @@ impl App {
             }
         });
         ui.weak(format!(
-            "Scanner original type: {} ({} lamp)",
-            self.s.film.original().label(),
-            if self.s.film.original().light() == LightSource::Reflective { "reflective" } else { "transmission" }
+            "Scanned as {} with the {} lamp{}",
+            self.s.film.original().label().to_lowercase(),
+            if self.s.film.original().light() == LightSource::Reflective { "reflective" } else { "transmission" },
+            if self.s.film.is_negative() { ", inverted on the computer" } else { "" }
         ));
 
         ui.separator();
@@ -541,8 +542,8 @@ impl App {
         }
 
         ui.separator();
-        ui.collapsing("Advanced (hardware calibration)", |ui| {
-            ui.weak("Only change these if a first test on real hardware shows a wrong size or area. See docs/hardware.md.");
+        ui.collapsing("Advanced (diagnostics)", |ui| {
+            ui.weak("Diagnostic options. The defaults match SCREEN's own driver, leave them unless asked to change them.");
             ui.horizontal(|ui| {
                 ui.label("Area unit");
                 ui.selectable_value(&mut self.s.area_unit, AreaUnit::TenthMm, "0.1 mm");

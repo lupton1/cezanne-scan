@@ -8,6 +8,8 @@ Version 0.2.0, October 2026.
 |---|---|
 | Protocol builders, window descriptor, sense, inquiry, gamma | unit tests |
 | Full scan through the driver (set window, scan, read exact byte count) | tests against the simulator |
+| Waiting out lamp warm up on TEST UNIT READY and on SCAN | tests against the simulator |
+| Window bytes equal to SCREEN's driver for each original type | unit tests built from the driver analysis |
 | Bridge client and server, token check, refusal of firmware writes from a raw client | loopback tests |
 | Image pipeline (positive, flipped negative, auto levels, levels, curve, rotate, channel pick) | unit tests |
 | TIFF and ICC output | unit tests and visual checks |
@@ -45,14 +47,19 @@ builder now writes the same bytes as ColorGeniusEX:
 The first test steps are in [hardware.md](hardware.md). The output of `cezanne-cli probe`
 from the real scanner is still the most useful thing to have.
 
-## Continuous integration
+## Releases and continuous integration
 
-The GitHub Actions workflow builds the Windows, macOS and Linux installers. The first
-packaging run was started by the commit "Packaging, CI and documentation [package]" on
-2026-10-15. Its result has not been checked yet (the repository is private and was not
-viewable from the build machine). Check the Actions tab. The installers are attached to the
-run as artifacts. If a job failed, its log shows why.
+Every `v*` tag builds the Windows, macOS and Linux installers on GitHub Actions and
+publishes them as a GitHub release (see [building.md](building.md)). Version 0.2.0 was the
+first tag. If a release is missing its installers, the failed job's log on the Actions tab
+shows why.
 
-A locally built Windows installer (from the LLVM MinGW toolchain, see building.md) was
-tested on 2026-10-15: per user install without admin rights, app demo run, CLI and bridge
-run, clean uninstall.
+The Windows installer was also built locally (LLVM MinGW toolchain) and tested on
+2026-10-15 and 2026-10-16: per user install without admin rights, app demo run, CLI and
+bridge run, clean uninstall.
+
+## Choices made for safety
+
+* Negatives are scanned as positive film and inverted on the computer, the proven owner
+  method. The scanner's Negative Film type is not used yet.
+* Firmware downloads, factory parameter writes and EEPROM saves are blocked in every layer.

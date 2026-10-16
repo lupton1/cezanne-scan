@@ -99,10 +99,10 @@ struct ScanArgs {
     /// Embed this ICC profile instead of the generated one.
     #[arg(long)]
     icc: Option<PathBuf>,
-    /// Unit of the area fields sent to the scanner (hardware calibration aid).
+    /// Unit of the area fields sent to the scanner (diagnostic, the default matches SCREEN's driver).
     #[arg(long, value_enum, default_value_t = Unit::TenthMm)]
     area_unit: Unit,
-    /// Factor between dpi and the 32 bit resolution fields (hardware calibration aid).
+    /// Factor between dpi and the 32 bit resolution fields (diagnostic, the default matches SCREEN's driver).
     #[arg(long, default_value_t = 10)]
     res_scale: u32,
 }

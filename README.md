@@ -5,8 +5,8 @@ current Windows, macOS and Linux.
 
 The Cezanne was sold with ColorGeniusEX, which only runs on PowerPC Macs (Mac OS 9 or OS X
 10.6 with Rosetta). Cezanne Scan replaces it. It was built by reverse engineering the
-scanner's own firmware to learn its SCSI command set, so it talks to the scanner directly
-with no SCREEN software installed.
+scanner's own firmware and SCREEN's original Mac driver to learn the SCSI commands, so it
+talks to the scanner directly with no SCREEN software installed.
 
 ![Cezanne Scan running against the built in simulator](docs/images/app-simulator.png)
 
@@ -43,9 +43,9 @@ Download the installer for your system from the
 
 ### Windows 10 and 11
 
-Run `cezanne-scan_<version>_x64-setup.exe`. It installs for the current user and needs no
-administrator rights. It adds Cezanne Scan to the Start menu together with `cezanne-cli`
-and `cezanne-bridge`.
+Run `cezanne-scan_<version>_x64-setup.exe`. It installs for the current user into
+`%LOCALAPPDATA%\Cezanne Scan` and needs no administrator rights. It adds Cezanne Scan to the
+Start menu and puts `cezanne-cli.exe` and `cezanne-bridge.exe` in the same folder.
 
 Talking to a SCSI scanner directly needs administrator rights on Windows, so right click
 Cezanne Scan and choose **Run as administrator** when scanning with a local SCSI card. The
@@ -97,7 +97,8 @@ cezanne-cli list
 Tips from Cezanne owners, built into the presets:
 
 * **Negatives:** scan in positive mode and flip the densities. HD around 2.0 to 2.5 and
-  SD 0 to 0.2. Use the highlight dropper on the brightest part of the picture and the
+  SD 0 to 0.2. Cezanne Scan does this for you: the negative film types are scanned as
+  positive film and inverted on the computer. Use the highlight dropper on the brightest part of the picture and the
   shadow dropper on the film rebate. For colour negatives this also removes the orange
   mask.
 * Keep MIN at 0 and MAX at 255, turn sharpening off and add a gentle S curve.
@@ -155,6 +156,8 @@ Full details, including building on Windows without Visual Studio, are in
 | `crates/cezanne-bridge` | network bridge |
 | `docs/` | protocol, hardware, building, architecture and status notes |
 | `packaging/` | icons and the Linux udev rule |
+| `Packager.toml` | installer settings for cargo-packager |
+| `.github/workflows/` | tests, installers and releases |
 | `scripts/` | icon generator |
 
 ## How it was made

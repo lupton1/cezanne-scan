@@ -131,12 +131,30 @@ impl Scanner {
     }
 
     /// Start a scan of the listed windows.
-    pub fn start(&mut self, ids: &[u8]) -> Result<()> {
+    ///
+    /// Like SCREEN's driver, a NOT READY answer to SCAN (the lamp is still warming up,
+    /// 04/80) is waited out, here for up to five minutes.
+    pub fn start(&mut self, ids: &[u8], cancel: &AtomicBool) -> Result<()> {
         if ids.is_empty() || ids.len() > 100 {
             return Err(Error::InvalidParameter("a scan needs 1 to 100 windows".into()));
         }
-        self.run(&cdb::scan(ids.len() as u8), DataPhase::Out(ids), LONG)?;
-        Ok(())
+        let begin = Instant::now();
+        loop {
+            match self.run(&cdb::scan(ids.len() as u8), DataPhase::Out(ids), LONG) {
+                Ok(_) => return Ok(()),
+                Err(Error::Scsi { sense: Some(s), .. }) if s.key == SenseKey::NotReady => {
+                    if begin.elapsed() > Duration::from_secs(300) {
+                        return Err(Error::Timeout(format!("scanner still not ready after five minutes: {s}")));
+                    }
+                    if cancel.load(Ordering::Relaxed) {
+                        return Err(Error::Cancelled);
+                    }
+                    log::info!("scanner warming up ({s}), waiting");
+                    std::thread::sleep(Duration::from_secs(2));
+                }
+                Err(e) => return Err(e),
+            }
+        }
     }
 
     /// Read exactly one window's worth of image data.
@@ -172,7 +190,7 @@ impl Scanner {
         }
         let result = (|| {
             self.set_windows(std::slice::from_ref(&desc))?;
-            self.start(&[desc.window_id()])?;
+            self.start(&[desc.window_id()], cancel)?;
             let bytes = self.read_image(&g, progress, cancel)?;
             RawImage::from_scanner(&g, &bytes, settings.x_dpi, settings.y_dpi)
         })();
@@ -257,6 +275,16 @@ mod tests {
         // the orange mask makes the red channel brighter than blue on a colour negative
         let m = img.channel_means();
         assert!(m[0] > m[2], "means {m:?}");
+    }
+
+    #[test]
+    fn scan_waits_out_lamp_warm_up() {
+        use crate::scsi::sim::SimConfig;
+        let sim = Simulator::new(SimConfig { warmup_polls: 0, power_on_attention: false, scan_warmup: 1, ..SimConfig::default() });
+        let mut s = Scanner::open(Box::new(sim)).unwrap();
+        let ws = WindowSettings::new(ScanArea::new(30.0, 30.0, 10.0, 10.0), 100.0, ColorMode::Gray16);
+        let cancel = AtomicBool::new(false);
+        assert!(s.scan(&ws, &mut |_| {}, &cancel).is_ok());
     }
 
     #[test]

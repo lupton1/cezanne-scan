@@ -40,9 +40,21 @@ cargo-packager downloads NSIS and the AppImage tools by itself on first use.
 ## Continuous integration
 
 [.github/workflows/build.yml](../.github/workflows/build.yml) runs the tests and a simulated
-scan on every push to `main`. It builds the three installers when a `v*` tag is pushed (and
-then creates a draft release), when the workflow is started by hand, or when a commit
-message contains `[package]`. Installers are kept as workflow artifacts.
+scan on every push to `main`. It builds the three installers when a `v*` tag is pushed,
+when the workflow is started by hand, or when a commit message contains `[package]`.
+Installers are kept as workflow artifacts. For a `v*` tag a release job then publishes a
+GitHub release with the installers attached and the notes for that version taken from
+[CHANGELOG.md](../CHANGELOG.md).
+
+To make a release:
+
+```bash
+git tag -a v0.3.0 -m "Cezanne Scan 0.3.0"
+git push origin v0.3.0
+```
+
+after updating the version in `Cargo.toml` and `Packager.toml` and adding a
+`## 0.3.0 (date)` section to the changelog.
 
 ## Windows without Visual Studio
 

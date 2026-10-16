@@ -35,9 +35,10 @@ same on every system.
   and a step wedge).
 
 **`protocol`** builds CDBs and parses or builds the scanner's data structures. The window
-descriptor builder fills both the standard SCSI-2 fields and the vendor fields so the
-scanner sees consistent values. Two unit conventions are parameters (`AreaUnit` and
-`resolution_scale`) until confirmed on hardware.
+descriptor builder writes the same bytes as SCREEN's own driver (`SetJobToDevice` in
+"FT-S5000 Driver" 2.1.3): area offsets in 0.1 mm, resolution as dpi times 10, pixel and
+line counts, the scan mode, lookup table selectors and the lamp for each original type.
+`AreaUnit` and `resolution_scale` remain as diagnostic options only.
 
 **`scanner`** is the driver: identify, clear unit attention, wait for warm up, reserve,
 set window, scan, read the exact byte count in whole lines, release.
@@ -64,17 +65,22 @@ reads.
 
 ## Data flow of a scan
 
-1. The app builds `WindowSettings` (area in mm, dpi, colour mode, light source).
+1. The app builds `WindowSettings` (area in mm, dpi, colour mode, the scanner's original
+   type derived from the film type, and whether it is a prescan).
 2. `WindowDescriptor::build` turns that into the 176 byte descriptor and the expected
    geometry (pixels per line, lines, bytes per pixel).
-3. The driver validates the descriptor with the firmware's own limits, sends SET WINDOW
-   and SCAN, then READ(10) in chunks of whole lines until the expected byte count arrives.
+3. The driver waits for the lamp to warm up, reserves the scanner, validates the
+   descriptor with the firmware's own limits, sends SET WINDOW and SCAN, then READ(10) in
+   chunks of whole lines (up to 256 KB) until the expected byte count arrives, and
+   releases the scanner.
 4. `RawImage::from_scanner` decodes big endian samples (8 bit modes are linearised).
 5. `Adjustments::apply` produces the final image, which is written as TIFF with an ICC
    profile.
 
 ## Reverse engineering notes
 
-See [protocol.md](protocol.md). Tools used: Vineflower for the Maintainer's Java classes,
-Ghidra 12 for the PowerPC driver shim, the PEF applications and the SH-2 firmware. The
-decompiled SCREEN code is kept outside the repository.
+See [protocol.md](protocol.md). Sources: the scanner firmware (Hitachi SH-2, unpacked
+from the LHA archive inside `FT-S5000_V2.12.jfirm`), SCREEN's host driver "FT-S5000 Driver"
+2.1.3 (PowerPC PEF with debug function names, plus its `FT-S5000 Config` file), the
+Maintainer tool and its JNI shim. Tools: Vineflower for the Java classes, Ghidra 12 for the
+PowerPC and SH-2 code. No decompiled SCREEN code is kept in the repository.

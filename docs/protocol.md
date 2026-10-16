@@ -148,6 +148,11 @@ original. The continuous tone types and their lookup table selector strings (a s
 
 The other types are three line art types and four colour separation types.
 
+Cezanne Scan uses Positive Film for all film, including negatives (the method Cezanne
+owners use with ColorGeniusEX: scan as positive, then invert with flipped HD and SD), and
+Photograph for prints. The Negative Film lookup tables are not used until their effect has
+been seen on real scans.
+
 ## SCAN (0x1B)
 
 CDB byte 4 is the number of window IDs that follow (max 100). The data out phase is the
@@ -171,8 +176,8 @@ CDB byte 2 is the data type code, byte 5 the qualifier, bytes 6 to 8 the length.
 
 | Type | Qualifier | Length | Content | Used by Cezanne Scan |
 |---|---|---|---|---|
-| `0x03` | 1 to 6 | up to 1530 | gamma tables, 3 channels of 510 bytes | yes |
-| `0x84` | 1 to 4 | 60 | RGB colour matrix | yes, never with the save bit |
+| `0x03` | 1 to 6 | up to 1530 | gamma tables, 3 channels of 510 bytes | supported by the driver code, not sent by default |
+| `0x84` | 1 to 4 | 60 | RGB colour matrix | no |
 | `0x8A` | 1 | 16 | memory switches | **no** |
 | `0x8B` | 1 | 16335 | factory mechanical parameters | **no** |
 | `0x8C` | 1 | 10 to 16 | serial number | **no** |

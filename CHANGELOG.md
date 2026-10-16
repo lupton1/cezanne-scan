@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+* Negative film types are scanned with the scanner's Positive Film type and inverted on
+  the computer, matching the documented owner workflow
+* SCAN is retried while the scanner reports NOT READY (lamp warm up), like SCREEN's driver
+* Documentation reviewed against the code (architecture, building, hardware, status,
+  protocol)
+
 ## 0.2.0 (2026-10-16)
 
 Window descriptors now match SCREEN's own driver byte for byte.

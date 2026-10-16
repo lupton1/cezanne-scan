@@ -41,11 +41,15 @@ impl FilmType {
     pub const ALL: [FilmType; 4] = [FilmType::Positive, FilmType::ColorNegative, FilmType::BwNegative, FilmType::Reflective];
 
     /// The scanner's original type for this film (selects lamp and lookup tables).
+    ///
+    /// Negatives are scanned as positive film, the method Cezanne owners use with
+    /// ColorGeniusEX: the scanner delivers plain linear transmission and the inversion and
+    /// orange mask removal happen on the computer (flipped HD and SD). The scanner's own
+    /// "Negative Film" type selects different lookup tables whose effect is not known yet.
     pub fn original(self) -> crate::protocol::OriginalType {
         use crate::protocol::OriginalType;
         match self {
-            FilmType::Positive => OriginalType::PositiveFilm,
-            FilmType::ColorNegative | FilmType::BwNegative => OriginalType::NegativeFilm,
+            FilmType::Positive | FilmType::ColorNegative | FilmType::BwNegative => OriginalType::PositiveFilm,
             FilmType::Reflective => OriginalType::Photograph,
         }
     }

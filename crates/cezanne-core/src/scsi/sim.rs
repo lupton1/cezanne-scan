@@ -21,6 +21,9 @@ pub struct SimConfig {
     /// Sleep per delivered line, to make progress bars realistic in the app.
     pub line_delay: Duration,
     pub revision: String,
+    /// SCAN answers NOT READY 04/80 this many times (lamp warm up seen on SCAN, as
+    /// SCREEN's driver expects).
+    pub scan_warmup: u32,
 }
 
 impl Default for SimConfig {
@@ -30,6 +33,7 @@ impl Default for SimConfig {
             power_on_attention: true,
             line_delay: Duration::ZERO,
             revision: "2.12".into(),
+            scan_warmup: 0,
         }
     }
 }
@@ -44,6 +48,7 @@ struct Job {
 pub struct Simulator {
     cfg: SimConfig,
     warmup_left: u32,
+    scan_warmup_left: u32,
     attention: bool,
     sense: Option<Sense>,
     header: [u8; HEADER_LEN],
@@ -66,6 +71,7 @@ impl Simulator {
     pub fn new(cfg: SimConfig) -> Self {
         Simulator {
             warmup_left: cfg.warmup_polls,
+            scan_warmup_left: cfg.scan_warmup,
             attention: cfg.power_on_attention,
             cfg,
             sense: None,
@@ -185,6 +191,10 @@ impl Simulator {
     }
 
     fn scan(&mut self, c: &[u8], data: DataPhase<'_>) -> Completion {
+        if self.scan_warmup_left > 0 {
+            self.scan_warmup_left -= 1;
+            return self.fail(SenseKey::NotReady, 0x04, 0x80);
+        }
         let count = c[4] as usize;
         if count > 100 {
             return self.illegal(0x26, 0x02);
