@@ -1,17 +1,10 @@
 name: build
 
-# Tests run on every push to main (Linux only, cheap).
-# Installers for Windows, macOS and Linux are built when:
-#   * a tag starting with v is pushed (also publishes a GitHub release with the installers), or
-#   * the workflow is started by hand (Actions tab, Run workflow), or
-#   * a commit message on main contains [package].
-# Private repositories pay for Actions minutes (macOS minutes count ten times),
-# which is why installers are not built on every push.
+# Manual only: hosted runners cost money on this private repository (macOS minutes count ten times),
+# so releases are built on the host and uploaded by hand. Start this from the Actions tab
+# (Run workflow) only if a hosted build is really wanted.
 
 on:
-  push:
-    branches: [main]
-    tags: ["v*"]
   workflow_dispatch:
 
 permissions:
