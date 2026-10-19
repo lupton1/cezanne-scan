@@ -1,10 +1,10 @@
 # Changelog
 
-## Unreleased
+## 0.3.1 (2026-10-19)
 
 * Windows: the exe now statically links the C runtime, so it no longer needs the Microsoft
   Visual C++ Redistributable (VCRUNTIME140.dll). A CI built release could fail to start on a
-  machine without that runtime. The self contained installer for v0.3.0 replaces the old asset
+  machine without that runtime. This release ships a self contained Windows installer. macOS and Linux are unchanged from v0.3.0
 
 ## 0.3.0 (2026-10-16)
 
