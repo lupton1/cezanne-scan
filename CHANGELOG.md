@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+* Windows: the exe now statically links the C runtime, so it no longer needs the Microsoft
+  Visual C++ Redistributable (VCRUNTIME140.dll). A CI built release could fail to start on a
+  machine without that runtime. The self contained installer for v0.3.0 replaces the old asset
+
 ## 0.3.0 (2026-10-16)
 
 * macOS: direct connection to a scanner on a SCSI card through IOKit's SCSI task

@@ -1,0 +1,9 @@
+# Statically link the C runtime on Windows so the built exe is self contained.
+# Without this an MSVC build needs VCRUNTIME140.dll from the Visual C++ Redistributable,
+# which many machines do not have. The gnullvm target used for local builds also links
+# the runtime in. See docs/building.md.
+[target.x86_64-pc-windows-msvc]
+rustflags = ["-C", "target-feature=+crt-static"]
+
+[target.x86_64-pc-windows-gnullvm]
+rustflags = ["-C", "target-feature=+crt-static"]

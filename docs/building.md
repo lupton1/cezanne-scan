@@ -37,6 +37,11 @@ cargo packager -c Packager.toml --release --target <triple> \
 
 cargo-packager downloads NSIS and the AppImage tools by itself on first use.
 
+The Windows exe must link the C runtime statically so it runs on machines without the
+Microsoft Visual C++ Redistributable. This repo sets that in `.cargo/config.toml`
+(`crt-static` for both the `msvc` and `gnullvm` targets), so no extra step is needed. A quick
+check: `llvm-objdump -p cezanne-scan.exe` should list no `VCRUNTIME140.dll`.
+
 ### macOS universal app
 
 The macOS release runs on both Intel and Apple Silicon Macs. The workflow builds both
