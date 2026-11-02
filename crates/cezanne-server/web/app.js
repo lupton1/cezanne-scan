@@ -742,7 +742,7 @@ function renderFiles() {
     const tr = document.createElement('tr');
     const cell = (t) => { const td = document.createElement('td'); td.textContent = t; tr.appendChild(td); return td; };
     cell(f.file_name);
-    cell(f.frame);
+    cell(f.frame || 'earlier scan');
     cell(`${f.width} x ${f.height}, ${f.bits} bit ${f.channels === 3 ? 'RGB' : 'grey'}`);
     cell(`${(f.bytes / 1e6).toFixed(1)} MB`);
     const td = cell('');

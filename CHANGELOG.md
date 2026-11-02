@@ -10,6 +10,11 @@
 * `packaging/macos/install-server.sh` installs the server as a launch daemon that starts
   when the Mac boots, and a systemd unit is included for Linux
 * The installers now include `cezanne-server`
+* The scan server lists the scans already in its folder when it starts, so files made
+  before a restart of the server or the Mac can still be downloaded
+* The scan page says when a scan starts, and its phone layout is tidier
+* `install-server.sh --bridge-token` for a server that reaches the scanner through a bridge
+* A user manual with pictures: [docs/manual.md](docs/manual.md)
 * Colour now matches ColorGeniusEX: finished scans carry a profile with the exact
   colorimetry of SCREEN's 5000stdRGB (the FT-S5000's own RGB space, gamma 2.289), which
   the owner's ColorGeniusEX recipes used as both input and output profile. Earlier

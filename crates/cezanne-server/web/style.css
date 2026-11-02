@@ -162,6 +162,9 @@ details summary { cursor: pointer; color: var(--weak); margin: 6px 0; }
   #layout { grid-template-columns: 260px 1fr 330px; }
 }
 @media (max-width: 860px) {
+  #server-name { display: none; }
+  header h1 { white-space: nowrap; }
+  header button { white-space: nowrap; }
   #layout { display: flex; flex-direction: column; overflow-y: auto; }
   aside { overflow: visible; border: 0 !important; }
   #bed-wrap { height: 60vw; min-height: 260px; flex: none; }

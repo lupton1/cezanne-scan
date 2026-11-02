@@ -4,13 +4,14 @@
 # Cezanne Scan web page to the network.
 #
 #   sudo ./install-server.sh [--token SECRET] [--port 7820] [--connect auto]
-#                            [--output-dir DIR] [--binary PATH]
+#                            [--bridge-token SECRET] [--output-dir DIR] [--binary PATH]
 #   sudo ./install-server.sh --uninstall
 #
 # --token       access token browsers must enter once (recommended)
 # --port        web port, 7820 unless given
 # --connect     scanner to open at start: auto (default), sim, a device address,
 #               or bridge:HOST
+# --bridge-token  token of the cezanne-bridge when using --connect bridge:HOST
 # --output-dir  where scans are kept on the Mac, ~/Pictures/Cezanne Scans unless given
 # --binary      cezanne-server to install, found automatically unless given
 #
@@ -23,6 +24,7 @@ DEST_DIR=/usr/local/libexec/cezanne-scan
 LOG=/Library/Logs/cezanne-server.log
 PORT=7820
 TOKEN=""
+BRIDGE_TOKEN=""
 CONNECT=auto
 OUTPUT=""
 BINARY=""
@@ -33,10 +35,11 @@ while [ $# -gt 0 ]; do
     --token) TOKEN="$2"; shift 2 ;;
     --port) PORT="$2"; shift 2 ;;
     --connect) CONNECT="$2"; shift 2 ;;
+    --bridge-token) BRIDGE_TOKEN="$2"; shift 2 ;;
     --output-dir) OUTPUT="$2"; shift 2 ;;
     --binary) BINARY="$2"; shift 2 ;;
     --uninstall) UNINSTALL=1; shift ;;
-    -h|--help) sed -n '2,20p' "$0"; exit 0 ;;
+    -h|--help) sed -n '2,21p' "$0"; exit 0 ;;
     *) echo "Unknown option $1 (see --help)"; exit 1 ;;
   esac
 done
@@ -106,6 +109,10 @@ TOKEN_XML=""
 if [ -n "$TOKEN" ]; then
   TOKEN_XML="    <key>CEZANNE_SERVER_TOKEN</key><string>$(esc "$TOKEN")</string>"
 fi
+if [ -n "$BRIDGE_TOKEN" ]; then
+  TOKEN_XML="$TOKEN_XML
+    <key>CEZANNE_BRIDGE_TOKEN</key><string>$(esc "$BRIDGE_TOKEN")</string>"
+fi
 
 launchctl bootout "system/$LABEL" 2>/dev/null || true
 cat > "$PLIST" <<EOF
@@ -134,7 +141,7 @@ $TOKEN_XML
 </dict>
 </plist>
 EOF
-# the token is in this file, so only root may read it
+# the tokens are in this file, so only root may read it
 chown root:wheel "$PLIST"
 chmod 600 "$PLIST"
 plutil -lint "$PLIST" >/dev/null

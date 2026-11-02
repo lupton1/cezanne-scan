@@ -10,6 +10,9 @@ talks to the scanner directly with no SCREEN software installed.
 
 ![Cezanne Scan running against the built in simulator](docs/images/app-simulator.png)
 
+**New here? Read the [user manual](docs/manual.md)**: setting up, scanning step by step,
+every control, recipes for each kind of film, and troubleshooting, with pictures.
+
 > **Status:** the software is complete and fully tested against a simulated FT-S5000. Its
 > scan commands match SCREEN's own driver byte for byte, but it has **not yet been run on a
 > real scanner**. See [docs/STATUS.md](docs/STATUS.md) and the first test steps in
@@ -205,7 +208,7 @@ Full details, including building on Windows without Visual Studio, are in
 | `crates/cezanne-cli` | command line tool |
 | `crates/cezanne-bridge` | network bridge |
 | `crates/cezanne-server` | web server and the browser interface (`web/`) |
-| `docs/` | protocol, hardware, server, building, architecture and status notes |
+| `docs/` | user manual, protocol, hardware, server, building, architecture and status notes |
 | `packaging/` | icons, the Linux udev rule and service, the macOS server installer |
 | `Packager.toml` | installer settings for cargo-packager |
 | `.github/workflows/` | tests, installers and releases |

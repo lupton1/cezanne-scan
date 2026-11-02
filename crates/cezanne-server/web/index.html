@@ -28,14 +28,14 @@
         <button data-v="Bridge">Bridge</button>
       </div>
       <div id="conn-sim" class="conn-opt"><p class="weak">A virtual FT-S5000 with test film on the bed.</p></div>
-      <div id="conn-local" class="conn-opt">
+      <div id="conn-local" class="conn-opt" hidden>
         <p class="weak">The scanner on the server's own SCSI card. Leave Device empty to use the first scanner found.</p>
         <label class="row">Device <input id="device" placeholder="automatic" list="device-list"></label>
         <datalist id="device-list"></datalist>
         <button id="find-devices" class="small">Find scanners</button>
         <span id="device-note" class="weak"></span>
       </div>
-      <div id="conn-bridge" class="conn-opt">
+      <div id="conn-bridge" class="conn-opt" hidden>
         <p class="weak">A cezanne-bridge on another computer that has the scanner.</p>
         <label class="row">Host <input id="bridge-host" placeholder="pc-name or 192.168.0.20"></label>
         <label class="row">Token <input id="bridge-token" type="password"></label>

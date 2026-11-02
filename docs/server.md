@@ -65,7 +65,7 @@ you press **Remove** in the Scans list, so a download that went wrong can be rep
    to open. The service runs as your user, so the scans belong to you.
 
    Options: `--port` (7820 unless given), `--connect` (`auto` unless given, or `sim`, a
-   device address, or `bridge:HOST`), `--output-dir`, `--binary`. Run it again after
+   device address, or `bridge:HOST`), `--bridge-token`, `--output-dir`, `--binary`. Run it again after
    updating Cezanne Scan. `sudo packaging/macos/install-server.sh --uninstall` removes the
    service and keeps the scans.
 

@@ -153,12 +153,58 @@ impl AppState {
             cancel: Arc::new(AtomicBool::new(false)),
             limits: ModelLimits::FT_S5000,
         });
+        state.load_existing_files();
         let s2 = state.clone();
         std::thread::Builder::new()
             .name("scanner".into())
             .spawn(move || run(rx, s2))
             .expect("spawn scanner thread");
         state
+    }
+
+    /// List the scans already in the output folder, so files made before a restart of the
+    /// server (or of the Mac) can still be downloaded from the page.
+    fn load_existing_files(&self) {
+        let Ok(rd) = std::fs::read_dir(&self.cfg.output_dir) else { return };
+        let mut found: Vec<(u64, PathBuf)> = rd
+            .filter_map(|e| e.ok())
+            .map(|e| e.path())
+            .filter(|p| p.extension().is_some_and(|x| x.eq_ignore_ascii_case("tif") || x.eq_ignore_ascii_case("tiff")))
+            .map(|p| {
+                let t = std::fs::metadata(&p)
+                    .and_then(|m| m.modified())
+                    .ok()
+                    .and_then(|t| t.duration_since(UNIX_EPOCH).ok())
+                    .map(|d| d.as_secs())
+                    .unwrap_or(0);
+                (t, p)
+            })
+            .collect();
+        found.sort();
+        let mut sh = self.shared();
+        for (created, path) in found {
+            let Ok(mut f) = std::fs::File::open(&path) else { continue };
+            let Some((width, height, bits, channels)) = tiff::read_info_from(&mut f) else { continue };
+            sh.file_seq += 1;
+            let id = sh.file_seq;
+            let file_name = path.file_name().map(|f| f.to_string_lossy().to_string()).unwrap_or_default();
+            sh.files.push(ScanFile {
+                id,
+                frame: String::new(),
+                bytes: std::fs::metadata(&path).map(|m| m.len()).unwrap_or(0),
+                file_name,
+                path,
+                width,
+                height,
+                channels: channels as usize,
+                bits: bits as u8,
+                created,
+            });
+        }
+        if !sh.files.is_empty() {
+            let n = sh.files.len();
+            sh.log(format!("{n} earlier scans found in {}", self.cfg.output_dir.display()), false);
+        }
     }
 
     pub fn shared(&self) -> std::sync::MutexGuard<'_, Shared> {
@@ -265,6 +311,10 @@ fn run(rx: Receiver<Request>, st: Arc<AppState>) {
             }
             Request::Scan(jobs) => {
                 let n = jobs.len();
+                if let Some(j) = jobs.first() {
+                    let what = if n == 1 { j.name.clone() } else { format!("{n} frames") };
+                    st.log(format!("Scanning {what} at {} dpi", j.window.x_dpi), false);
+                }
                 let mut ok = 0;
                 for (i, job) in jobs.into_iter().enumerate() {
                     let Some(s) = scanner.as_mut() else {

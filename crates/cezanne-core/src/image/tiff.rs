@@ -151,19 +151,31 @@ pub fn encode<W: Write + Seek>(w: &mut W, img: &Processed, depth: BitDepth, icc:
 /// Read back the basics of a file written by [`encode`] (used by tests and the app's
 /// "open previous scan" feature).
 pub fn read_info(bytes: &[u8]) -> Option<(u32, u32, u16, u16)> {
-    if bytes.len() < 8 || &bytes[0..4] != b"II*\0" {
+    read_info_from(&mut std::io::Cursor::new(bytes))
+}
+
+/// [`read_info`] for a file, reading only the header and the directory (which
+/// [`encode`] puts after the image data), so large scans are not loaded.
+pub fn read_info_from<R: std::io::Read + Seek>(r: &mut R) -> Option<(u32, u32, u16, u16)> {
+    let mut head = [0u8; 8];
+    r.read_exact(&mut head).ok()?;
+    if &head[0..4] != b"II*\0" {
         return None;
     }
-    let ifd = u32::from_le_bytes(bytes[4..8].try_into().ok()?) as usize;
-    let n = u16::from_le_bytes(bytes.get(ifd..ifd + 2)?.try_into().ok()?) as usize;
+    let ifd = u32::from_le_bytes(head[4..8].try_into().ok()?) as u64;
+    r.seek(std::io::SeekFrom::Start(ifd)).ok()?;
+    let mut nb = [0u8; 2];
+    r.read_exact(&mut nb).ok()?;
+    let n = u16::from_le_bytes(nb) as usize;
+    let mut entries = vec![0u8; n * 12];
+    r.read_exact(&mut entries).ok()?;
     let (mut w, mut h, mut bps, mut spp) = (0, 0, 0, 0);
-    for i in 0..n {
-        let e = ifd + 2 + i * 12;
-        let tag = u16::from_le_bytes(bytes.get(e..e + 2)?.try_into().ok()?);
-        let typ = u16::from_le_bytes(bytes.get(e + 2..e + 4)?.try_into().ok()?);
-        let count = u32::from_le_bytes(bytes.get(e + 4..e + 8)?.try_into().ok()?);
-        let v32 = u32::from_le_bytes(bytes.get(e + 8..e + 12)?.try_into().ok()?);
-        let v16 = u16::from_le_bytes(bytes.get(e + 8..e + 10)?.try_into().ok()?);
+    for e in entries.chunks_exact(12) {
+        let tag = u16::from_le_bytes([e[0], e[1]]);
+        let typ = u16::from_le_bytes([e[2], e[3]]);
+        let count = u32::from_le_bytes([e[4], e[5], e[6], e[7]]);
+        let v32 = u32::from_le_bytes([e[8], e[9], e[10], e[11]]);
+        let v16 = u16::from_le_bytes([e[8], e[9]]);
         match tag {
             256 => w = v32,
             257 => h = v32,
@@ -171,7 +183,9 @@ pub fn read_info(bytes: &[u8]) -> Option<(u32, u32, u16, u16)> {
                 bps = if count == 1 {
                     v16
                 } else {
-                    u16::from_le_bytes(bytes.get(v32 as usize..v32 as usize + 2)?.try_into().ok()?)
+                    r.seek(std::io::SeekFrom::Start(v32 as u64)).ok()?;
+                    r.read_exact(&mut nb).ok()?;
+                    u16::from_le_bytes(nb)
                 }
             }
             277 => spp = if typ == 3 { v16 } else { v32 as u16 },
