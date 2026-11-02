@@ -46,6 +46,8 @@ check: `llvm-objdump -p cezanne-scan.exe` should list no `VCRUNTIME140.dll`.
 
 ### macOS universal app
 
+On a Mac, `scripts/build-macos.sh` does every step below and writes the dmg to `dist/`.
+
 The macOS release runs on both Intel and Apple Silicon Macs. The workflow builds both
 targets with `MACOSX_DEPLOYMENT_TARGET=10.15`, joins each program with `lipo` into
 `target/universal-apple-darwin/release`, packages the app with

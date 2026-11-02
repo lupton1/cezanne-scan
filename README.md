@@ -212,7 +212,7 @@ Full details, including building on Windows without Visual Studio, are in
 | `packaging/` | icons, the Linux udev rule and service, the macOS server installer |
 | `Packager.toml` | installer settings for cargo-packager |
 | `.github/workflows/` | tests, installers and releases |
-| `scripts/` | icon generator |
+| `scripts/` | Mac build script, icon generator |
 
 ## How it was made
 
