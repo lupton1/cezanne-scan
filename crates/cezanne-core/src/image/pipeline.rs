@@ -305,7 +305,10 @@ impl Adjustments {
         if c == 3 {
             match self.gray {
                 GrayMode::Keep => {}
-                GrayMode::Luminance => to_gray(&mut out, |p| 0.2126 * p[0] as f64 + 0.7152 * p[1] as f64 + 0.0722 * p[2] as f64),
+                GrayMode::Luminance => {
+                    let [wr, wg, wb] = super::icc::scanner_luminance();
+                    to_gray(&mut out, |p| wr * p[0] as f64 + wg * p[1] as f64 + wb * p[2] as f64)
+                }
                 GrayMode::Channel(k) => {
                     let k = (k as usize).min(2);
                     to_gray(&mut out, |p| p[k] as f64)

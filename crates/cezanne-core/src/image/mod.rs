@@ -158,12 +158,30 @@ pub struct Processed {
 }
 
 impl Processed {
-    /// 8 bit RGBA for on screen display.
+    /// 8 bit sRGB RGBA for on screen display. The data is in the scanner's colour space
+    /// (see [`icc::output_profile`]), so it is converted to sRGB the way a colour managed
+    /// editor would show the saved file.
     pub fn to_rgba8(&self) -> Vec<u8> {
+        let lin: Vec<f64> = (0..4096).map(|i| (i as f64 / 4095.0).powf(icc::SCANNER_GAMMA)).collect();
+        let enc: Vec<u8> = (0..4096)
+            .map(|i| {
+                let v = i as f64 / 4095.0;
+                let s = if v <= 0.003_130_8 { 12.92 * v } else { 1.055 * v.powf(1.0 / 2.4) - 0.055 };
+                (s * 255.0).round().clamp(0.0, 255.0) as u8
+            })
+            .collect();
+        let to8 = |v: f64| enc[(v.clamp(0.0, 1.0) * 4095.0).round() as usize];
+        let m = icc::scanner_to_srgb();
         let mut out = Vec::with_capacity((self.width * self.height) as usize * 4);
         for px in self.data.chunks_exact(self.channels) {
-            let (r, g, b) = if self.channels == 3 { (px[0], px[1], px[2]) } else { (px[0], px[0], px[0]) };
-            out.extend_from_slice(&[(r >> 8) as u8, (g >> 8) as u8, (b >> 8) as u8, 255]);
+            if self.channels == 3 {
+                let c = [lin[(px[0] >> 4) as usize], lin[(px[1] >> 4) as usize], lin[(px[2] >> 4) as usize]];
+                let s = m.map(|row| row[0] * c[0] + row[1] * c[1] + row[2] * c[2]);
+                out.extend_from_slice(&[to8(s[0]), to8(s[1]), to8(s[2]), 255]);
+            } else {
+                let g = to8(lin[(px[0] >> 4) as usize]);
+                out.extend_from_slice(&[g, g, g, 255]);
+            }
         }
         out
     }

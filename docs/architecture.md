@@ -84,7 +84,39 @@ and sends them with each preview or scan request. See [server.md](server.md).
    releases the scanner.
 4. `RawImage::from_scanner` decodes big endian samples (8 bit modes are linearised).
 5. `Adjustments::apply` produces the final image, which is written as TIFF with an ICC
-   profile.
+   profile (see Colour below).
+
+## Colour
+
+ColorGeniusEX keeps RGB scans in the FT-S5000's own colour space. SCREEN describes that
+space with the "5000stdRGB V1.1" profile shipped with ColorGeniusEX ("this profile adjusts
+RGB images to be output from the FT-S5000"). The owner's saved ColorGeniusEX recipes
+(`.CNT` files) store 5000stdRGB as both the input and the output profile, byte for byte
+the same as the shipped file, so the RGB data was never converted to another space, and
+ColorGeniusEX could embed that output profile in the saved TIFF (its Embed check box).
+
+Cezanne Scan does the same. `icc::output_profile` builds a profile with exactly the
+primaries, white point and tone curve of 5000stdRGB (matrix and gamma 586/256 = 2.289,
+scanner class), taken from the profile's numbers, and every finished TIFF carries it. The
+values are checked against SCREEN's file by a unit test. Only the profile name differs, and
+SCREEN's file itself is not included.
+
+| | 5000stdRGB |
+|---|---|
+| red XYZ (D50) | 0.5629, 0.2365, 0.0050 |
+| green XYZ | 0.2849, 0.7394, 0.0542 |
+| blue XYZ | 0.1163, 0.0241, 0.7661 |
+| white | D50 |
+| tone curve | gamma 2.289 |
+
+The space is wider than sRGB, mainly in the reds and greens. Previews are converted from
+it to sRGB so they look the way a colour managed editor shows the saved file. Grey made
+with the Grey button uses the luminance weights of this space. Greyscale files carry a grey
+profile with the same tone curve.
+
+The `.C5T` "mode profiles" that ColorGeniusEX also loads (for example `EURODS_16bit.C5T`)
+are SCREEN's colour separation tables for printing presses (CMYK) and set the default
+highlight and shadow analysis. They are not used for RGB output and are not needed.
 
 ## Reverse engineering notes
 

@@ -12,7 +12,7 @@ Version 0.4.0, November 2026.
 | Window bytes equal to SCREEN's driver for each original type | unit tests built from the driver analysis |
 | Bridge client and server, token check, refusal of firmware writes from a raw client | loopback tests |
 | Image pipeline (positive, flipped negative, auto levels, levels, curve, rotate, channel pick) | unit tests |
-| TIFF and ICC output | unit tests and visual checks |
+| TIFF and ICC output | unit tests and visual checks. The embedded profile was compared tag by tag with SCREEN's 5000stdRGB (2026-11-02): identical primaries, white, tone curve and class |
 | Desktop app end to end (connect, prescan, frames, scan, save) | scripted demo run against the simulator |
 | Server mode: web page, prescan, frames, droppers, auto levels, scan, download, token, busy guard | run against the simulator in a browser on Windows (2026-11-02), API checked with curl, phone layout checked |
 | Server code for macOS and Linux | type checked for `aarch64-apple-darwin`, `x86_64-apple-darwin` and `x86_64-unknown-linux-gnu` |

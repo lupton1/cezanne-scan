@@ -120,7 +120,7 @@ fn run(rx: Receiver<Request>, tx: Sender<Event>, cancel: Arc<AtomicBool>, ctx: e
                             adj.auto_levels(&raw, 0.002);
                         }
                         let out = adj.apply(&raw);
-                        let profile = if out.channels == 3 { icc::rgb_profile(2.2) } else { icc::gray_profile(2.2) };
+                        let profile = icc::output_profile(out.channels);
                         if let Some(dir) = job.path.parent() {
                             std::fs::create_dir_all(dir)?;
                         }

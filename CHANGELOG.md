@@ -10,6 +10,12 @@
 * `packaging/macos/install-server.sh` installs the server as a launch daemon that starts
   when the Mac boots, and a systemd unit is included for Linux
 * The installers now include `cezanne-server`
+* Colour now matches ColorGeniusEX: finished scans carry a profile with the exact
+  colorimetry of SCREEN's 5000stdRGB (the FT-S5000's own RGB space, gamma 2.289), which
+  the owner's ColorGeniusEX recipes used as both input and output profile. Earlier
+  versions tagged files as sRGB primaries with gamma 2.2, so colour managed editors showed
+  them less saturated than ColorGeniusEX scans. Previews are converted for the screen, and
+  the Grey button uses this space's luminance weights
 
 ## 0.3.1 (2026-10-19)
 

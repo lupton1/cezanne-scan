@@ -258,18 +258,12 @@ fn scan(a: ScanArgs) -> cezanne_core::Result<()> {
         Some(p) => std::fs::read(p)?,
         None if a.raw => {
             if out.channels == 3 {
-                icc::rgb_profile(1.0)
+                icc::scanner_rgb_profile(1.0)
             } else {
-                icc::gray_profile(1.0)
+                icc::scanner_gray_profile(1.0)
             }
         }
-        None => {
-            if out.channels == 3 {
-                icc::rgb_profile(2.2)
-            } else {
-                icc::gray_profile(2.2)
-            }
-        }
+        None => icc::output_profile(out.channels),
     };
     let depth = if a.eight_bit { tiff::BitDepth::Eight } else { tiff::BitDepth::Sixteen };
     tiff::write_tiff(&a.out, &out, depth, Some(&profile))?;

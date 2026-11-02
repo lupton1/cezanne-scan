@@ -26,7 +26,9 @@ talks to the scanner directly with no SCREEN software installed.
 * Mid tone control, a curve editor, optional unsharp mask, single channel black and white,
   rotate and mirror
 * 8 or 16 bit greyscale and 24 or 48 bit colour scanning
-* 16 bit TIFF output with resolution tags and an embedded ICC profile
+* 16 bit TIFF output with resolution tags and an embedded ICC profile in the scanner's own
+  colour space, the same one ColorGeniusEX used (SCREEN's 5000stdRGB, see
+  [docs/architecture.md](docs/architecture.md#colour))
 * Live densitometer readout under the mouse
 * Presets, including the two black and white negative methods shared on the Large Format
   Photography forum
