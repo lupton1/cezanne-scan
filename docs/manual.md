@@ -119,7 +119,7 @@ nobody logged in.
 
    ```bash
    cd ~/Downloads/cezanne-scan-main
-   sudo packaging/macos/install-server.sh --token choose-a-secret
+   sudo bash packaging/macos/install-server.sh --token choose-a-secret
    ```
 
    Enter your Mac password when asked. The script:

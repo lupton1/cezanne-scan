@@ -56,7 +56,7 @@ you press **Remove** in the Scans list, so a download that went wrong can be rep
    `install-server.sh` was copied):
 
    ```bash
-   sudo packaging/macos/install-server.sh --token choose-a-secret
+   sudo bash packaging/macos/install-server.sh --token choose-a-secret
    ```
 
    The script copies `cezanne-server` to `/usr/local/libexec/cezanne-scan`, installs a
@@ -66,7 +66,7 @@ you press **Remove** in the Scans list, so a download that went wrong can be rep
 
    Options: `--port` (7820 unless given), `--connect` (`auto` unless given, or `sim`, a
    device address, or `bridge:HOST`), `--bridge-token`, `--output-dir`, `--binary`. Run it again after
-   updating Cezanne Scan. `sudo packaging/macos/install-server.sh --uninstall` removes the
+   updating Cezanne Scan. `sudo bash packaging/macos/install-server.sh --uninstall` removes the
    service and keeps the scans.
 
 4. **Keep the Mac awake.** A sleeping Mac stops serving the page. Use

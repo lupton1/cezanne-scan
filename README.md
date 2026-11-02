@@ -166,7 +166,7 @@ On a Mac mini, install the app and then set the server up as a service that star
 the Mac:
 
 ```bash
-sudo packaging/macos/install-server.sh --token choose-a-secret
+sudo bash packaging/macos/install-server.sh --token choose-a-secret
 ```
 
 Setup for macOS, Linux and Windows, the options and the security notes are in
