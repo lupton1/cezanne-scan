@@ -1,6 +1,6 @@
 # Status
 
-Version 0.3.1, October 2026.
+Version 0.4.0, November 2026.
 
 ## Verified
 
@@ -14,6 +14,8 @@ Version 0.3.1, October 2026.
 | Image pipeline (positive, flipped negative, auto levels, levels, curve, rotate, channel pick) | unit tests |
 | TIFF and ICC output | unit tests and visual checks |
 | Desktop app end to end (connect, prescan, frames, scan, save) | scripted demo run against the simulator |
+| Server mode: web page, prescan, frames, droppers, auto levels, scan, download, token, busy guard | run against the simulator in a browser on Windows (2026-11-02), API checked with curl, phone layout checked |
+| Server code for macOS and Linux | type checked for `aarch64-apple-darwin`, `x86_64-apple-darwin` and `x86_64-unknown-linux-gnu` |
 | Windows installer | built locally, installed per user without admin, app and tools run, uninstalled cleanly |
 | macOS universal app (0.2.2) | opened by the owner on an Intel Mac with macOS 15.8 Sequoia (2026-10-16) |
 | Linux and macOS code | type checked locally for all targets, packaged by GitHub Actions |
@@ -46,16 +48,18 @@ builder now writes the same bytes as ColorGeniusEX:
 3. **Filters and sharpening in the scanner** (bytes 66 to 71 and 132 to 141) are left off.
    Sharpening is done on the computer instead.
 4. **Gamma tables** for the 8 bit modes are not downloaded. Scan in 16 bit.
+5. **Server mode on a Mac.** `install-server.sh` (launch daemon, firewall, sleep check)
+   has been checked for syntax but not yet run on a Mac.
 
 The first test steps are in [hardware.md](hardware.md). The output of `cezanne-cli probe`
 from the real scanner is still the most useful thing to have.
 
 ## Releases and continuous integration
 
-Every `v*` tag builds the Windows, macOS and Linux installers on GitHub Actions and
-publishes them as a GitHub release (see [building.md](building.md)). Version 0.2.0 was the
-first tag. If a release is missing its installers, the failed job's log on the Actions tab
-shows why.
+The GitHub Actions workflow only runs when started by hand, because Actions minutes on a
+private repository cost money (macOS minutes count ten times). Releases from 0.3.1 on are
+built locally and uploaded. A Mac build needs a Mac, or a deliberate run of the workflow
+(see [building.md](building.md)).
 
 The Windows installer was also built locally (LLVM MinGW toolchain) and tested on
 2026-10-15 and 2026-10-16: per user install without admin rights, app demo run, CLI and

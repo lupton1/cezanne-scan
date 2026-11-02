@@ -1,0 +1,16 @@
+# systemd service for cezanne-server. Copy to /etc/systemd/system/, set User and the
+# token, then: sudo systemctl daemon-reload && sudo systemctl enable --now cezanne-server
+[Unit]
+Description=Cezanne Scan web server
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+# your account, which must be in the "scanner" group (see 60-cezanne-scan.rules)
+User=youruser
+Environment=CEZANNE_SERVER_TOKEN=choose-a-secret
+ExecStart=/usr/bin/cezanne-server --listen 0.0.0.0:7820 --connect auto
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

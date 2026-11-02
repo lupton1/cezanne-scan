@@ -1,9 +1,9 @@
 # Architecture
 
 ```
- cezanne-app (egui)      cezanne-cli        cezanne-bridge
-        |                     |                   |
-        +----------+----------+-------------------+
+ cezanne-app (egui)   cezanne-server (web)   cezanne-cli   cezanne-bridge
+        |                     |                   |             |
+        +----------+----------+-------------------+-------------+
                    |
              cezanne-core
    +---------------+-----------------+------------------+
@@ -66,6 +66,11 @@ The app keeps the scanner on a background thread (`worker.rs`). The UI sends req
 (connect, prescan, scan a list of frames, probe) and receives events (progress, prescan
 image, saved file, errors). Cancelling sets a shared flag that the driver checks between
 reads.
+
+`cezanne-server` has the same arrangement: one thread owns the scanner and takes
+requests from the web handlers, which read progress, the log, the prescan and the list of
+finished files from shared state. The browser page keeps the frames and their adjustments
+and sends them with each preview or scan request. See [server.md](server.md).
 
 ## Data flow of a scan
 

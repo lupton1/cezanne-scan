@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.4.0 (2026-11-02)
+
+* Server mode: `cezanne-server` runs on the computer the scanner is connected to (for
+  example a Mac mini) and serves the full Cezanne Scan interface as a web page. Any
+  browser on the network can prescan, set up frames, adjust them and scan, and the
+  finished 16 bit TIFF files with their ICC profile download to that browser's computer.
+  A copy stays on the server until removed. Optional access token
+* `packaging/macos/install-server.sh` installs the server as a launch daemon that starts
+  when the Mac boots, and a systemd unit is included for Linux
+* The installers now include `cezanne-server`
+
 ## 0.3.1 (2026-10-19)
 
 * Windows: the exe now statically links the C runtime, so it no longer needs the Microsoft

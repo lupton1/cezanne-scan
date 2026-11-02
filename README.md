@@ -32,6 +32,8 @@ talks to the scanner directly with no SCREEN software installed.
   Photography forum
 * Direct SCSI on Windows, Linux and macOS, or `cezanne-bridge` to share the scanner over
   the network
+* `cezanne-server` to run the scanner from a Mac mini or other computer and scan from any
+  browser on the network, with the files downloading to the computer you are using
 * `cezanne-cli` for scripted scans and diagnostics
 * A built in simulated scanner, so everything can be tried without hardware
 * Safety: commands that write firmware or factory settings into the scanner are blocked in
@@ -46,7 +48,8 @@ Download the installer for your system from the
 
 Run `cezanne-scan_<version>_x64-setup.exe`. It installs for the current user into
 `%LOCALAPPDATA%\Cezanne Scan` and needs no administrator rights. It adds Cezanne Scan to the
-Start menu and puts `cezanne-cli.exe` and `cezanne-bridge.exe` in the same folder.
+Start menu and puts `cezanne-cli.exe`, `cezanne-bridge.exe` and `cezanne-server.exe` in the
+same folder.
 
 Talking to a SCSI scanner directly needs administrator rights on Windows, so right click
 Cezanne Scan and choose **Run as administrator** when scanning with a local SCSI card. The
@@ -145,6 +148,27 @@ is recommended for high resolution scans.
 The bridge serves one client at a time and refuses commands that could change the
 scanner's firmware or factory data, whatever the client sends.
 
+## Scanning from any browser (server mode)
+
+`cezanne-server` turns the computer the scanner is plugged into, for example a Mac mini,
+into a scan server. Open `http://<computer-name>.local:7820` in a browser on any computer,
+tablet or phone on the same network and you get the full Cezanne Scan interface: prescan,
+frames, densities, droppers, curves, presets and batch scanning. The finished 16 bit TIFF
+files, with their ICC profile, download straight to the computer you are using, just as
+if the scanner were connected to it.
+
+On a Mac mini, install the app and then set the server up as a service that starts with
+the Mac:
+
+```bash
+sudo packaging/macos/install-server.sh --token choose-a-secret
+```
+
+Setup for macOS, Linux and Windows, the options and the security notes are in
+[docs/server.md](docs/server.md).
+
+![The web interface served by cezanne-server](docs/images/server-web.jpg)
+
 ## Command line
 
 ```bash
@@ -178,8 +202,9 @@ Full details, including building on Windows without Visual Studio, are in
 | `crates/cezanne-app` | the desktop app (egui) |
 | `crates/cezanne-cli` | command line tool |
 | `crates/cezanne-bridge` | network bridge |
-| `docs/` | protocol, hardware, building, architecture and status notes |
-| `packaging/` | icons and the Linux udev rule |
+| `crates/cezanne-server` | web server and the browser interface (`web/`) |
+| `docs/` | protocol, hardware, server, building, architecture and status notes |
+| `packaging/` | icons, the Linux udev rule and service, the macOS server installer |
 | `Packager.toml` | installer settings for cargo-packager |
 | `.github/workflows/` | tests, installers and releases |
 | `scripts/` | icon generator |

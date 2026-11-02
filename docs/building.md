@@ -7,7 +7,9 @@ cargo test --workspace
 cargo build --release --workspace
 ```
 
-The binaries are `cezanne-scan` (the app), `cezanne-cli` and `cezanne-bridge`.
+The binaries are `cezanne-scan` (the app), `cezanne-cli`, `cezanne-bridge` and
+`cezanne-server` (the web interface, see [server.md](server.md)). The server's page is
+built into the program from `crates/cezanne-server/web`.
 
 ## System packages
 
@@ -53,22 +55,20 @@ makes the `.dmg` with `hdiutil`.
 
 ## Continuous integration
 
-[.github/workflows/build.yml](../.github/workflows/build.yml) runs the tests and a simulated
-scan on every push to `main`. It builds the three installers when a `v*` tag is pushed,
-when the workflow is started by hand, or when a commit message contains `[package]`.
-Installers are kept as workflow artifacts. For a `v*` tag a release job then publishes a
-GitHub release with the installers attached and the notes for that version taken from
-[CHANGELOG.md](../CHANGELOG.md).
+[.github/workflows/build.yml](../.github/workflows/build.yml) runs the tests, a simulated
+scan and builds the three installers, but only when started by hand from the Actions tab
+(GitHub Actions minutes on a private repository cost money, and macOS minutes count ten
+times). Installers are kept as workflow artifacts.
 
-To make a release:
+Releases are normally built locally: update the version in `Cargo.toml` and
+`Packager.toml`, add a `## x.y.z (date)` section to the changelog, build the installers
+on each system as above, then publish them:
 
 ```bash
-git tag -a v0.3.0 -m "Cezanne Scan 0.3.0"
-git push origin v0.3.0
+git tag -a v0.4.0 -m "Cezanne Scan 0.4.0"
+git push origin v0.4.0
+gh release create v0.4.0 --title "Cezanne Scan 0.4.0" --notes-file notes.md dist/*
 ```
-
-after updating the version in `Cargo.toml` and `Packager.toml` and adding a
-`## 0.3.0 (date)` section to the changelog.
 
 ## Windows without Visual Studio
 

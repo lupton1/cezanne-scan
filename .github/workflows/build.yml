@@ -72,7 +72,7 @@ jobs:
           cargo build --release --workspace --target x86_64-apple-darwin
           U=target/universal-apple-darwin/release
           mkdir -p "$U"
-          for b in cezanne-scan cezanne-cli cezanne-bridge; do
+          for b in cezanne-scan cezanne-cli cezanne-bridge cezanne-server; do
             lipo -create -output "$U/$b" "target/aarch64-apple-darwin/release/$b" "target/x86_64-apple-darwin/release/$b"
             lipo -info "$U/$b"
           done

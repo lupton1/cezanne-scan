@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cezanne Scan</title>
+<link rel="icon" href="icon.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <img src="icon.png" alt="" class="logo">
+  <h1>Cezanne Scan</h1>
+  <span id="conn-pill" class="pill off">Not connected</span>
+  <span id="server-name" class="weak"></span>
+  <span class="grow"></span>
+  <button id="files-toggle" class="ghost">Scans <span id="files-count" class="badge">0</span></button>
+  <button id="log-toggle" class="ghost">Log</button>
+</header>
+
+<div id="layout">
+  <aside id="left">
+    <section>
+      <h2>Scanner</h2>
+      <div class="seg" id="conn-kind">
+        <button data-v="Simulator">Simulator</button>
+        <button data-v="Local">This computer</button>
+        <button data-v="Bridge">Bridge</button>
+      </div>
+      <div id="conn-sim" class="conn-opt"><p class="weak">A virtual FT-S5000 with test film on the bed.</p></div>
+      <div id="conn-local" class="conn-opt">
+        <p class="weak">The scanner on the server's own SCSI card. Leave Device empty to use the first scanner found.</p>
+        <label class="row">Device <input id="device" placeholder="automatic" list="device-list"></label>
+        <datalist id="device-list"></datalist>
+        <button id="find-devices" class="small">Find scanners</button>
+        <span id="device-note" class="weak"></span>
+      </div>
+      <div id="conn-bridge" class="conn-opt">
+        <p class="weak">A cezanne-bridge on another computer that has the scanner.</p>
+        <label class="row">Host <input id="bridge-host" placeholder="pc-name or 192.168.0.20"></label>
+        <label class="row">Token <input id="bridge-token" type="password"></label>
+      </div>
+      <div class="buttons">
+        <button id="connect" class="primary">Connect</button>
+        <button id="disconnect">Disconnect</button>
+        <button id="probe" title="Read only report of the scanner's state">Probe</button>
+      </div>
+      <p id="connected-as" class="ok"></p>
+    </section>
+
+    <section>
+      <h2>Original</h2>
+      <label class="row">Preset
+        <select id="preset"><option value="">Choose…</option></select>
+      </label>
+      <button id="save-preset" class="small">Save as preset</button>
+      <label class="row">Film <select id="film"></select></label>
+      <p id="film-note" class="weak"></p>
+    </section>
+
+    <section>
+      <h2>Scan</h2>
+      <label class="row">Mode <select id="mode"></select></label>
+      <label class="row">Resolution <input id="dpi" type="number" min="20" max="12000" step="10"> dpi</label>
+      <div class="quick" id="dpi-quick"></div>
+      <p id="scan-size" class="weak"></p>
+    </section>
+
+    <section>
+      <h2>Output</h2>
+      <label class="row">Name prefix <input id="prefix"></label>
+      <label class="check"><input type="checkbox" id="sixteen"> 16 bits per channel</label>
+      <label class="check"><input type="checkbox" id="auto-download"> Download to this computer when each scan finishes</label>
+      <p class="weak">Files are 16 bit TIFF with an embedded ICC colour profile. A copy stays on the server in <span id="server-dir"></span> until you remove it under Scans.</p>
+    </section>
+
+    <details>
+      <summary>Advanced (diagnostics)</summary>
+      <p class="weak">The defaults match SCREEN's own driver. Leave them unless asked to change them.</p>
+      <div class="row">Area unit
+        <div class="seg" id="area-unit">
+          <button data-v="TenthMm">0.1 mm</button>
+          <button data-v="Inch1200">1/1200 in</button>
+        </div>
+      </div>
+      <label class="row">Resolution field scale <input id="res-scale" type="number" min="1" max="100"></label>
+      <label class="row">Prescan <input id="prescan-dpi" type="number" min="20" max="300"> dpi</label>
+    </details>
+  </aside>
+
+  <main id="bed-wrap">
+    <canvas id="bed"></canvas>
+    <div id="bed-hint">Press Prescan to see the bed</div>
+  </main>
+
+  <aside id="right">
+    <div id="no-frame">
+      <h2>Frame</h2>
+      <p>Drag on the prescan to mark a frame. Each frame keeps its own settings.</p>
+      <p>Workflow from Cezanne owners:</p>
+      <ol>
+        <li>Prescan, then draw a frame around each image.</li>
+        <li>For negatives use flipped densities: HD high, SD low.</li>
+        <li>Use the droppers: highlight on the brightest part of the image, shadow on the film rebate.</li>
+        <li>Keep MIN 0 and MAX 255, sharpening off, add a gentle S curve.</li>
+        <li>Scan all frames in one go. The files download to this computer.</li>
+      </ol>
+    </div>
+    <div id="frame-editor" hidden>
+      <div class="row">
+        <input id="frame-name" class="grow">
+        <button id="frame-delete" class="danger small">Delete</button>
+      </div>
+      <div id="preview-box"><img id="preview" alt=""><div id="preview-msg" class="weak"></div></div>
+      <div class="buttons">
+        <button id="pick-hl" class="small toggle">Pick highlight</button>
+        <button id="pick-sd" class="small toggle">Pick shadow</button>
+        <button id="auto" class="small" title="Set HD and SD from this frame">Auto</button>
+        <button id="reset" class="small">Reset</button>
+      </div>
+      <table class="dens">
+        <tr><th></th><th class="r">R</th><th class="g">G</th><th class="b">B</th></tr>
+        <tr><th title="Highlight density">HD</th><td><input data-k="hd" data-c="0" type="number" step="0.01" min="0" max="4.5"></td><td><input data-k="hd" data-c="1" type="number" step="0.01" min="0" max="4.5"></td><td><input data-k="hd" data-c="2" type="number" step="0.01" min="0" max="4.5"></td></tr>
+        <tr><th title="Shadow density">SD</th><td><input data-k="sd" data-c="0" type="number" step="0.01" min="0" max="4.5"></td><td><input data-k="sd" data-c="1" type="number" step="0.01" min="0" max="4.5"></td><td><input data-k="sd" data-c="2" type="number" step="0.01" min="0" max="4.5"></td></tr>
+      </table>
+      <button id="link-g" class="small">Link channels to G</button>
+      <label class="slider">Mid tone <input id="gamma" type="range" min="0.3" max="3" step="0.01"><output id="gamma-v"></output></label>
+      <label class="slider">MIN <input id="out-min" type="range" min="0" max="128" step="1"><output id="out-min-v"></output></label>
+      <label class="slider">MAX <input id="out-max" type="range" min="128" max="255" step="1"><output id="out-max-v"></output></label>
+      <p class="weak">Curve (drag points, double click to add, right click to remove)</p>
+      <canvas id="curve" width="220" height="220"></canvas>
+      <div class="buttons">
+        <button id="curve-linear" class="small">Linear</button>
+        <button id="curve-s" class="small">Gentle S</button>
+      </div>
+      <label class="check"><input type="checkbox" id="sharpen"> Sharpen</label>
+      <div id="sharpen-opts">
+        <label class="slider">Amount <input id="sh-amount" type="range" min="0" max="3" step="0.05"><output id="sh-amount-v"></output></label>
+        <label class="slider">Radius <input id="sh-radius" type="range" min="0.3" max="5" step="0.1"><output id="sh-radius-v"></output></label>
+      </div>
+      <div class="row">Colour
+        <div class="seg" id="gray">
+          <button data-v="Keep">Keep</button>
+          <button data-v="Luminance">Grey</button>
+          <button data-v="0" title="Keep only this channel">R</button>
+          <button data-v="1" title="Keep only this channel">G</button>
+          <button data-v="2" title="Keep only this channel">B</button>
+        </div>
+      </div>
+      <div class="buttons">
+        <button id="rotate" class="small">Rotate</button>
+        <label class="check"><input type="checkbox" id="mirror"> Mirror</label>
+      </div>
+      <details>
+        <summary>Position (mm)</summary>
+        <div class="area">
+          <label>X <input data-a="x_mm" type="number" step="0.1"></label>
+          <label>Y <input data-a="y_mm" type="number" step="0.1"></label>
+          <label>W <input data-a="width_mm" type="number" step="0.1"></label>
+          <label>H <input data-a="height_mm" type="number" step="0.1"></label>
+        </div>
+      </details>
+    </div>
+  </aside>
+</div>
+
+<div id="files" hidden>
+  <div class="panel-head"><h2>Scans on the server</h2><button id="files-close" class="ghost">Close</button></div>
+  <table id="files-table">
+    <thead><tr><th>File</th><th>Frame</th><th>Pixels</th><th>Size</th><th></th></tr></thead>
+    <tbody></tbody>
+  </table>
+  <p id="files-empty" class="weak">No scans yet.</p>
+</div>
+
+<pre id="log" hidden></pre>
+
+<footer>
+  <button id="prescan" class="primary">Prescan</button>
+  <button id="scan-one">Scan frame</button>
+  <button id="scan-all">Scan all</button>
+  <button id="cancel" class="danger" hidden>Cancel</button>
+  <div id="progress" hidden><div id="progress-bar"></div><span id="progress-text"></span></div>
+  <span id="densito" class="mono"></span>
+  <span id="status" class="grow"></span>
+</footer>
+
+<div id="login" hidden>
+  <form id="login-form">
+    <h2>Cezanne Scan</h2>
+    <p>This server needs its access token.</p>
+    <input id="login-token" type="password" autocomplete="current-password" placeholder="Access token">
+    <button class="primary">Continue</button>
+    <p id="login-error" class="err"></p>
+  </form>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
