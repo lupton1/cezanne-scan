@@ -55,6 +55,12 @@ targets with `MACOSX_DEPLOYMENT_TARGET=10.15`, joins each program with `lipo` in
 (`codesign --force --deep --sign -`, needed for Apple Silicon without a Developer ID) and
 makes the `.dmg` with `hdiutil`.
 
+### C bridge for old Macs
+
+`bridge-c` holds a `cezanne-bridge` in plain C for Mac OS X 10.6 and later, which Rust
+cannot target. It is built with `make` in that folder and is not part of the workspace or
+the installers. See [bridge-c/README.md](../bridge-c/README.md).
+
 ## Continuous integration
 
 [.github/workflows/build.yml](../.github/workflows/build.yml) runs the tests, a simulated

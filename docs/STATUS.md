@@ -11,6 +11,7 @@ Version 0.4.0, November 2026.
 | Waiting out lamp warm up on TEST UNIT READY and on SCAN | tests against the simulator |
 | Window bytes equal to SCREEN's driver for each original type | unit tests built from the driver analysis |
 | Bridge client and server, token check, refusal of firmware writes from a raw client | loopback tests |
+| C bridge for Mac OS X 10.6 (`bridge-c`): protocol, token, refusal of firmware writes, probe and scan through it identical to the simulator, scan server through it | `make check` and a server run on macOS 15 (2026-11-08). The 10.6 build was checked for 10.6 load commands and system calls only |
 | Image pipeline (positive, flipped negative, auto levels, levels, curve, rotate, channel pick) | unit tests |
 | TIFF and ICC output | unit tests and visual checks. The embedded profile was compared tag by tag with SCREEN's 5000stdRGB (2026-11-02): identical primaries, white, tone curve and class |
 | Desktop app end to end (connect, prescan, frames, scan, save) | scripted demo run against the simulator |
@@ -48,7 +49,10 @@ builder now writes the same bytes as ColorGeniusEX:
 3. **Filters and sharpening in the scanner** (bytes 66 to 71 and 132 to 141) are left off.
    Sharpening is done on the computer instead.
 4. **Gamma tables** for the 8 bit modes are not downloaded. Scan in 16 bit.
-5. **Server mode on a Mac.** `install-server.sh` (launch daemon, firewall, sleep check)
+5. **C bridge on Mac OS X 10.6.** Not yet run on 10.6 or with the scanner on the old
+   Mac's SCSI card. The first steps are `cezanne-bridge --list` and then a probe from
+   Cezanne Scan through it.
+6. **Server mode on a Mac.** `install-server.sh` (launch daemon, firewall, sleep check)
    has been checked for syntax but not yet run on a Mac.
 
 The first test steps are in [hardware.md](hardware.md). The output of `cezanne-cli probe`

@@ -482,6 +482,10 @@ resolution scans.
 A scan server can use a bridge too: install the server with
 `--connect bridge:HOST --bridge-token SECRET`.
 
+If the computer with the SCSI card is a Mac older than macOS 10.15 (for example the Mac
+that ran ColorGeniusEX on Mac OS X 10.6), use the C bridge from
+[bridge-c](../bridge-c/README.md) there instead. It is used the same way.
+
 ## 14. Using a phone or tablet
 
 The scan page works on phones and tablets. The parts are stacked: settings first, then the

@@ -153,6 +153,11 @@ is recommended for high resolution scans.
 The bridge serves one client at a time and refuses commands that could change the
 scanner's firmware or factory data, whatever the client sends.
 
+**An older Mac as the bridge.** Cezanne Scan needs macOS 10.15 or later, but the Mac with
+the SCSI card is often older. [bridge-c](bridge-c/README.md) is a small bridge written in C
+that runs on Mac OS X 10.6 Snow Leopard and later. Run it on the old Mac and point Cezanne
+Scan or `cezanne-server` on a newer computer at it.
+
 ## Scanning from any browser (server mode)
 
 `cezanne-server` turns the computer the scanner is plugged into, for example a Mac mini,

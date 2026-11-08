@@ -5,4 +5,6 @@
 /target/
 /dist/
 *.pdb
+/bridge-c/cezanne-bridge
+/bridge-c/cezanne-bridge-relay
 .DS_Store

@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+* `bridge-c`: a `cezanne-bridge` written in plain C for Mac OS X 10.6 Snow Leopard and
+  later, for the old Mac that has the SCSI card. Cezanne Scan and `cezanne-server` need
+  macOS 10.15, so they run on a newer computer and reach the scanner through this bridge.
+  Same protocol, token and refusal of firmware and EEPROM writes as the Rust bridge. Tested
+  against the simulator, not yet on 10.6 or with the scanner
+
 ## 0.4.0 (2026-11-02)
 
 * Server mode: `cezanne-server` runs on the computer the scanner is connected to (for
