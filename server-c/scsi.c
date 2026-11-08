@@ -304,6 +304,7 @@ cz_transport *cz_tcp_connect(const char *addr_in, const char *token, cz_err *e)
 
 typedef struct {
     cz_transport base;
+    IOCFPlugInInterface **plugin;
     SCSITaskDeviceInterface **device;
 } iokit_transport;
 
@@ -497,6 +498,7 @@ static void iokit_close(cz_transport *t)
     iokit_transport *it = (iokit_transport *)t;
     (*it->device)->ReleaseExclusiveAccess(it->device);
     (*it->device)->Release(it->device);
+    IODestroyPlugInInterface(it->plugin);
     free(it);
 }
 
@@ -542,19 +544,23 @@ cz_transport *cz_open_local(const char *address, cz_err *e)
         return NULL;
     }
     hr = (*plugin)->QueryInterface(plugin, CFUUIDGetUUIDBytes(kIOSCSITaskDeviceInterfaceID), (LPVOID *)&device);
-    IODestroyPlugInInterface(plugin);
+    /* The plug in stays alive as long as the device. IODestroyPlugInInterface calls Stop, and
+     * Stop closes the user client connection, after which CreateSCSITask returns NULL. */
     if (hr != S_OK || device == NULL) {
+        IODestroyPlugInInterface(plugin);
         cz_fail(e, E_IO, "SCSITaskDeviceInterface not available (0x%x)", (int)hr);
         return NULL;
     }
     kr = (*device)->ObtainExclusiveAccess(device);
     if (kr != kIOReturnSuccess) {
         (*device)->Release(device);
+        IODestroyPlugInInterface(plugin);
         cz_fail(e, E_IO,
                 "the scanner is in use by another program (0x%x). Quit other scanning software and try again", kr);
         return NULL;
     }
     it = xcalloc(1, sizeof *it);
+    it->plugin = plugin;
     it->device = device;
     it->base.execute = iokit_execute;
     it->base.close = iokit_close;

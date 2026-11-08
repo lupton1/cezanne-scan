@@ -44,6 +44,32 @@ fn same(a: &[u8], b: &[u8]) -> bool {
     a.len() == b.len() && a.iter().zip(b).fold(0u8, |acc, (x, y)| acc | (x ^ y)) == 0
 }
 
+/// Percent encodes a token for the cookie, so `;`, spaces and non ASCII characters survive.
+fn cookie_encode(t: &str) -> String {
+    t.bytes()
+        .map(|b| if b.is_ascii_alphanumeric() || b"-._~".contains(&b) { (b as char).to_string() } else { format!("%{b:02X}") })
+        .collect()
+}
+
+fn cookie_decode(v: &str) -> Vec<u8> {
+    let b = v.as_bytes();
+    let hex = |c: u8| (c as char).to_digit(16).map(|d| d as u8);
+    let mut out = Vec::with_capacity(b.len());
+    let mut i = 0;
+    while i < b.len() {
+        if b[i] == b'%' && i + 2 < b.len() {
+            if let (Some(h), Some(l)) = (hex(b[i + 1]), hex(b[i + 2])) {
+                out.push(h * 16 + l);
+                i += 3;
+                continue;
+            }
+        }
+        out.push(b[i]);
+        i += 1;
+    }
+    out
+}
+
 /// True when the request carries the server's token (cookie or `X-Cezanne-Token` header),
 /// or when the server has no token.
 pub fn authorised(st: &AppState, headers: &HeaderMap) -> bool {
@@ -59,7 +85,7 @@ pub fn authorised(st: &AppState, headers: &HeaderMap) -> bool {
         .filter_map(|v| v.to_str().ok())
         .flat_map(|v| v.split(';'))
         .filter_map(|kv| kv.trim().split_once('='))
-        .any(|(k, v)| k == COOKIE && same(v.as_bytes(), token.as_bytes()))
+        .any(|(k, v)| k == COOKIE && same(&cookie_decode(v), token.as_bytes()))
 }
 
 #[derive(Deserialize)]
@@ -73,7 +99,7 @@ pub async fn login(State(st): St, Json(l): Json<Login>) -> Response {
             ApiError(StatusCode::UNAUTHORIZED, "Wrong access token".into()).into_response()
         }
         _ => {
-            let cookie = format!("{COOKIE}={}; Path=/; HttpOnly; SameSite=Strict; Max-Age=31536000", l.token.trim());
+            let cookie = format!("{COOKIE}={}; Path=/; HttpOnly; SameSite=Strict; Max-Age=31536000", cookie_encode(l.token.trim()));
             let mut r = Json(json!({ "ok": true })).into_response();
             if let Ok(v) = HeaderValue::from_str(&cookie) {
                 r.headers_mut().insert(header::SET_COOKIE, v);
@@ -480,5 +506,16 @@ mod tests {
         h.insert("x-cezanne-token", HeaderValue::from_static("sekrit"));
         assert!(authorised(&st, &h));
         assert!(authorised(&server(None), &HeaderMap::new()));
+    }
+
+    #[test]
+    fn awkward_tokens_survive_the_cookie() {
+        let token = "a;b c%20=\u{e9}";
+        let st = server(Some(token));
+        let mut h = HeaderMap::new();
+        let cookie = format!("a=b; {COOKIE}={}", cookie_encode(token));
+        h.insert(header::COOKIE, HeaderValue::from_str(&cookie).unwrap());
+        assert!(authorised(&st, &h));
+        assert_eq!(cookie_encode("plain-Token_0.~"), "plain-Token_0.~");
     }
 }

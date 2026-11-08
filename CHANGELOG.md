@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+* `server-c` and `bridge-c`: fixed "cannot create a SCSI task" on a real Mac. The IOKit
+  plug in was destroyed right after opening the device, which closes the connection to the
+  scanner. It now stays open until the scanner is closed
+* Access token: a wrong token now says "Wrong access token", the page says so if the
+  browser refuses the login cookie, and tokens containing `;`, spaces or non ASCII
+  characters now work (the cookie is percent encoded). Both the Rust and the C server
 * `server-c`: `cezanne-server` written in plain C for Mac OS X 10.6 Snow Leopard and later,
   so the old Mac with the SCSI card can be the scan server itself. It drives the scanner
   through IOKit and serves the same web page and API as the Rust server, and saves the

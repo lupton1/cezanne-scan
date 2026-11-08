@@ -908,6 +908,36 @@ static int same(const char *a, size_t al, const char *b, size_t bl)
     return acc == 0;
 }
 
+/* percent encoded in the cookie, so ; spaces and non ASCII characters survive (api.rs) */
+static void cookie_encode(const char *in, sbuf *out)
+{
+    const unsigned char *p = (const unsigned char *)in;
+    for (; *p; p++) {
+        if (isalnum(*p) && *p < 0x80)
+            sb_byte(out, *p);
+        else if (*p == '-' || *p == '.' || *p == '_' || *p == '~')
+            sb_byte(out, *p);
+        else
+            sb_printf(out, "%%%02X", *p);
+    }
+}
+
+/* in place, returns the new length */
+static size_t cookie_decode(char *s)
+{
+    size_t i = 0, o = 0, n = strlen(s);
+    while (i < n) {
+        if (s[i] == '%' && i + 2 < n && hexval(s[i + 1]) >= 0 && hexval(s[i + 2]) >= 0) {
+            s[o++] = (char)(hexval(s[i + 1]) * 16 + hexval(s[i + 2]));
+            i += 3;
+        } else {
+            s[o++] = s[i++];
+        }
+    }
+    s[o] = 0;
+    return o;
+}
+
 static int authorised(const http_req *r)
 {
     char *h, *cookie;
@@ -935,7 +965,7 @@ static int authorised(const http_req *r)
             trim_in_place(kv);
             eq = strchr(kv, '=');
             if (eq != NULL && (size_t)(eq - kv) == strlen(COOKIE) && strncmp(kv, COOKIE, strlen(COOKIE)) == 0)
-                ok = same(eq + 1, strlen(eq + 1), S.token, tl);
+                ok = same(eq + 1, cookie_decode(eq + 1), S.token, tl);
             p = semi ? semi + 1 : NULL;
         }
         free(cookie);
@@ -1300,9 +1330,9 @@ static void handle_login(client *c, const http_req *r)
 {
     jv *v = parse_body(c, r);
     const char *tok;
-    char *t, extra[600];
-    size_t i;
-    int printable = 1;
+    char *t;
+    static const char ok[] = "{\"ok\":true}";
+    sbuf extra;
 
     if (v == NULL)
         return;
@@ -1320,17 +1350,12 @@ static void handle_login(client *c, const http_req *r)
         send_error(c, 401, "Wrong access token");
         return;
     }
-    for (i = 0; t[i]; i++)
-        if ((unsigned char)t[i] < 0x20 || t[i] == 0x7F)
-            printable = 0;
-    if (printable && strlen(t) < 400) {
-        static const char ok[] = "{\"ok\":true}";
-        snprintf(extra, sizeof extra,
-                 "Set-Cookie: " COOKIE "=%s; Path=/; HttpOnly; SameSite=Strict; Max-Age=31536000\r\n", t);
-        send_body(c, 200, "application/json", ok, sizeof ok - 1, extra);
-    } else {
-        send_ok(c);
-    }
+    sb_init(&extra);
+    sb_puts(&extra, "Set-Cookie: " COOKIE "=");
+    cookie_encode(t, &extra);
+    sb_puts(&extra, "; Path=/; HttpOnly; SameSite=Strict; Max-Age=31536000\r\n");
+    send_body(c, 200, "application/json", ok, sizeof ok - 1, extra.p);
+    sb_free(&extra);
     free(t);
 }
 

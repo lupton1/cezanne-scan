@@ -60,7 +60,7 @@ async function api(path, opts = {}) {
     init.body = JSON.stringify(opts.body);
   }
   const r = await fetch('api/' + path, init);
-  if (r.status === 401) {
+  if (r.status === 401 && path !== 'login') {
     showLogin();
     throw new Error('Access token needed');
   }
@@ -98,6 +98,11 @@ $('login-form').addEventListener('submit', async (e) => {
   e.preventDefault();
   try {
     await api('login', { body: { token: $('login-token').value } });
+    const info = await api('info');
+    if (!info.authorised) {
+      $('login-error').textContent = 'The token is right, but this browser did not keep the login cookie. Allow cookies for this page and try again.';
+      return;
+    }
     $('login').hidden = true;
     $('login-error').textContent = '';
     start();

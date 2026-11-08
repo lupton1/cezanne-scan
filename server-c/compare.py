@@ -335,6 +335,27 @@ def main():
               and got[0]["mode"] == "Gray16", f"preset read back {got}")
         rp = [x for x in R.call("api/presets")[2]["presets"] if x["name"] == "zz compare test"]
         check(len(rp) == 1 and as_f32(rp[0]["adjustments"]) == as_f32(s2), f"Rust server reads the C preset {rp}")
+
+        print("awkward tokens")
+        # non ASCII only where the environment is UTF-8, Windows gives C programs its ANSI code page
+        awkward = ["a;b", "has space", "a&b=c", "p%20q", 'x"y'] + ([] if os.name == "nt" else ["café"])
+        for i, tok in enumerate(awkward):
+            for exe, port in ((a.rust, 7931 + 2 * i), (a.c, 7932 + 2 * i)):
+                e = dict(os.environ, CEZANNE_SERVER_TOKEN=tok, PYTHONUTF8="1")
+                p = subprocess.Popen([exe, "--listen", f"127.0.0.1:{port}", "--output-dir", out_c], stdout=log,
+                                     stderr=subprocess.STDOUT, env=e)
+                procs.append(p)
+                s = Server(os.path.basename(exe), port)
+                wait_port(s.base)
+                st, h, _ = s.call("api/login", {"token": tok}, cookie=False)
+                check(st == 200, f"{s.name} login with {tok!r}: {st}")
+                st2, _, j2 = s.call("api/login", {"token": tok + "x"}, cookie=False)
+                check(st2 == 401 and j2.get("error") == "Wrong access token", f"{s.name} wrong token {tok!r}: {st2}")
+                s.cookie = (h.get("Set-Cookie") or "").split(";")[0]
+                st3 = s.call("api/state")[0]
+                check(st3 == 200 and ";" not in s.cookie, f"{s.name} cookie for {tok!r}: {st3} {s.cookie}")
+                p.terminate()
+                p.wait()
     finally:
         for p in procs:
             p.terminate()
