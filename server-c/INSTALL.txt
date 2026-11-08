@@ -142,9 +142,51 @@ WHERE THINGS ARE ON THE OLD MAC
   Service file:   /Library/LaunchDaemons/com.lupton1.cezanne-server.plist
 
 
+UPGRADING OR REINSTALLING
+-------------------------
+Use these steps when you get a new zip, for example a fixed version, or to
+change the token or settings. Scans already made are kept. Make sure nothing is
+scanning first.
+
+A. On the old Mac, drag the old "cezanne-server-c-1.0" folder and the old zip
+   from Downloads to the Trash. If the old folder is still there, the new one
+   unzips as "cezanne-server-c-1.0 2".
+
+B. Copy the new zip to the old Mac's Downloads folder and double click it.
+
+C. If you have forgotten your token, this shows it. Do it before step D:
+
+       sudo grep CEZANNE_SERVER_TOKEN /Library/LaunchDaemons/com.lupton1.cezanne-server.plist
+
+D. In Terminal, type these three lines, pressing Return after each (with your
+   own token instead of choose-a-secret):
+
+       cd ~/Downloads/cezanne-server-c-1.0
+       sudo bash install.sh --uninstall
+       sudo bash install.sh --token choose-a-secret
+
+   You need all three. The service runs its own copy of the program, so
+   unzipping the new one changes nothing by itself. The second line stops the
+   old copy and the third installs the new one.
+
+   Use the same token as before, or the page will ask for the new one. If you
+   first installed with --port, --output-dir or --connect, add them again on
+   the last line. Each install replaces all the old settings.
+
+E. To check the new copy is in place, type:
+
+       ls -l /usr/local/libexec/cezanne-scan/cezanne-server
+
+   The date and time should be when you did step D. A fixed build can have the
+   same version number, so the date is the thing to look at.
+
+F. On your other device, reload the page, then repeat steps 12 to 14.
+
+
 CHANGING OR REMOVING IT
 -----------------------
-  New token or settings: run step 8 again with the new values.
+  New token or settings: follow "Upgrading or reinstalling" above, using the
+  folder you already have (start at step C).
 
   To stop and remove the service (scans already made are kept), in Terminal
   in the cezanne-server-c-1.0 folder:
@@ -161,7 +203,8 @@ TROUBLESHOOTING
     * check the old Mac is on and awake, and on the same network
     * try the address with numbers instead of the .local name
     * if the Mac's firewall is on, the installer allows the server through. If
-      you turned the firewall on later, run step 8 again
+      you turned the firewall on later, reinstall it (see "Upgrading or
+      reinstalling" above, start at step C)
 
   "Wrong token": type it exactly as in step 8. Capitals count.
 
