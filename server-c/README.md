@@ -71,6 +71,10 @@ program cannot hold a big scan in memory.
 
 ## Installing on the old Mac
 
+[INSTALL.txt](INSTALL.txt) has the same steps written out one at a time for the person at
+the old Mac, with what to check and what to do when something does not work. It is in
+the release zip too.
+
 Copy `cezanne-server` and `install.sh` into one folder on the old Mac, switch the scanner on
 before the Mac, quit ColorGeniusEX, and in Terminal (Applications, Utilities) in that
 folder:

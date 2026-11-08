@@ -1,0 +1,179 @@
+CEZANNE SCAN SERVER FOR THE OLD MAC (Mac OS X 10.6 and later)
+Step by step instructions
+================================================================================
+
+What this does
+--------------
+The old Mac with the SCSI card becomes the scan server. You scan from a browser
+on any other computer, tablet or phone on the home network, and the finished
+16 bit TIFF files download to that device.
+
+    phone, tablet or computer  ->  network  ->  old Mac  ->  SCSI card  ->  scanner
+
+You need:
+  * the old Mac with the SCSI card, the scanner connected and Mac OS X 10.6 or
+    later
+  * another device with a current browser (Safari, Chrome, Firefox or Edge from
+    the last few years). Safari on the old Mac itself is too old for the page
+  * both on the same home network. A network cable on the old Mac is best for
+    big scans
+
+Nothing in this has been tried with the real scanner yet. Go slowly the first
+time and note exactly what happens at each step.
+
+
+PART 1: PUT THE PROGRAM ON THE OLD MAC
+--------------------------------------
+1. Copy the zip to the old Mac's Downloads folder (download it there, or copy it
+   over with a USB stick or the network).
+
+2. Double click the zip. A folder called "cezanne-server-c-1.0" appears in
+   Downloads. (Safari sometimes unzips it for you, then the folder is already
+   there.)
+
+
+PART 2: CHECK THE MAC CAN SEE THE SCANNER
+-----------------------------------------
+3. Switch the scanner on FIRST, then switch the Mac on (or restart it). The Mac
+   only looks for SCSI devices when it starts.
+
+4. Quit ColorGeniusEX and any other scanning software. Only one program can use
+   the scanner at a time.
+
+5. Open Terminal: Finder, Applications, Utilities, Terminal.
+
+6. Type these two lines, pressing Return after each:
+
+       cd ~/Downloads/cezanne-server-c-1.0
+       ./cezanne-server --list
+
+   You should see a line like this:
+
+       iokit:4294968123  SCREEN   FT-S5000         2.12 type 6  (supported scanner)
+
+   If you see it, go on to Part 3.
+
+   If it says "No SCSI devices without a driver were found":
+     * check the scanner was on before the Mac started, then restart the Mac
+     * check the SCSI cable and the terminator at the end of the chain
+     * check the SCSI card's driver is installed (System Profiler, Parallel SCSI
+       should list the card)
+     * if ColorGeniusEX was open, quit it and restart the Mac
+   Then try step 6 again.
+
+
+PART 3: INSTALL IT AS A SERVICE
+-------------------------------
+7. Choose a token. This is a password that anyone using the scan page must
+   enter once, for example a word only your household knows. Do not use a
+   password you use anywhere else.
+
+8. In the same Terminal window, type (with your own token instead of
+   choose-a-secret):
+
+       sudo bash install.sh --token choose-a-secret
+
+   It asks for the Mac's login password. Nothing shows while you type it, that
+   is normal. Press Return.
+
+9. It finishes with lines like these. Write down the address:
+
+       cezanne-server is running and starts with the Mac.
+       Open one of these in a browser on another computer, tablet or phone ...
+           http://old-mac.local:7820
+           http://192.168.0.25:7820
+
+   If it says "this Mac is set to sleep", stop the Mac sleeping so the page
+   stays available: System Preferences, Energy Saver, Computer sleep: Never.
+
+From now on the server starts by itself whenever the old Mac starts. Nobody
+needs to log in on the old Mac.
+
+
+PART 4: THE FIRST TEST FROM ANOTHER DEVICE
+------------------------------------------
+10. On your other computer, tablet or phone, open a browser and go to the
+    address from step 9 (http://old-mac.local:7820). If the .local name does
+    not work, use the one with numbers.
+
+11. Enter your token when the page asks for it. The device remembers it.
+
+12. At the top left, under Scanner, it should say Connected and
+    "SCREEN FT-S5000". If it says Not connected, choose "This computer" and
+    press Connect.
+
+13. Press Probe. It reads the scanner's identity and status without moving
+    anything. The result appears in the Log (button at the top right).
+
+14. Load a strip of film, choose the film type under Original and press
+    Prescan at the bottom left. The whole bed scans at low resolution (75 dpi)
+    and appears in the middle.
+
+If any of steps 12 to 14 fails, open the Log on the page and the log file on
+the old Mac (see "Where things are" below) and send both, with what you saw.
+
+
+PART 5: SCANNING
+----------------
+15. Prescan (step 14).
+16. Drag on the prescan to draw a frame around each picture. Click a frame to
+    select it.
+17. Adjust the selected frame on the right. For negatives use the highlight
+    dropper on the brightest part of the picture and the shadow dropper on the
+    film rebate.
+18. Set the resolution (for example 4000 dpi for 35 mm) and press Scan frame or
+    Scan all.
+19. When a scan finishes it downloads to the device you are using (the box
+    "Download to this computer when each scan finishes" under Output, on by
+    default). Scans (top right) lists every finished scan to download again or
+    delete. A copy also stays on the old Mac until you delete it there.
+
+The full user manual with pictures is docs/manual.md in the project:
+https://github.com/lupton1/cezanne-scan/blob/main/docs/manual.md
+(chapters 5 to 12 cover the scan page).
+
+
+WHERE THINGS ARE ON THE OLD MAC
+-------------------------------
+  Program:        /usr/local/libexec/cezanne-scan/cezanne-server
+  Scans:          your home folder, Pictures, Cezanne Scans
+  Log file:       /Library/Logs/cezanne-server.log
+                  (open it with Console, in Applications, Utilities)
+  Service file:   /Library/LaunchDaemons/com.lupton1.cezanne-server.plist
+
+
+CHANGING OR REMOVING IT
+-----------------------
+  New token or settings: run step 8 again with the new values.
+
+  To stop and remove the service (scans already made are kept), in Terminal
+  in the cezanne-server-c-1.0 folder:
+
+      sudo bash install.sh --uninstall
+
+  To use ColorGeniusEX again, remove the service first (or restart the Mac
+  after removing it), because the server keeps hold of the scanner.
+
+
+TROUBLESHOOTING
+---------------
+  The page does not open:
+    * check the old Mac is on and awake, and on the same network
+    * try the address with numbers instead of the .local name
+    * if the Mac's firewall is on, the installer allows the server through. If
+      you turned the firewall on later, run step 8 again
+
+  "Wrong token": type it exactly as in step 8. Capitals count.
+
+  "The scanner is in use by another program": quit ColorGeniusEX, or restart
+  the old Mac.
+
+  The page looks broken or blank: use a newer browser on another device. Safari
+  on Mac OS X 10.6 cannot show it.
+
+
+SAFETY
+------
+The server always refuses the commands that could change the scanner's
+firmware or factory settings (WRITE BUFFER, vendor command 0xC9 and any SEND
+that saves to the scanner's memory), whatever is sent to it.
