@@ -61,6 +61,11 @@ makes the `.dmg` with `hdiutil`.
 cannot target. It is built with `make` in that folder and is not part of the workspace or
 the installers. See [bridge-c/README.md](../bridge-c/README.md).
 
+`server-c` holds the scan server in plain C for the same Macs, also built with `make` in
+its folder. `make host` builds a test version for the computer you are on (it also builds
+on Windows with llvm-mingw, without IOKit) and `compare.py` checks it against the Rust
+server. See [server-c/README.md](../server-c/README.md).
+
 ## Continuous integration
 
 [.github/workflows/build.yml](../.github/workflows/build.yml) runs the tests, a simulated

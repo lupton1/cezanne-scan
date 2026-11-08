@@ -153,10 +153,15 @@ is recommended for high resolution scans.
 The bridge serves one client at a time and refuses commands that could change the
 scanner's firmware or factory data, whatever the client sends.
 
-**An older Mac as the bridge.** Cezanne Scan needs macOS 10.15 or later, but the Mac with
-the SCSI card is often older. [bridge-c](bridge-c/README.md) is a small bridge written in C
-that runs on Mac OS X 10.6 Snow Leopard and later. Run it on the old Mac and point Cezanne
-Scan or `cezanne-server` on a newer computer at it.
+**An older Mac with the SCSI card.** Cezanne Scan needs macOS 10.15 or later, but the Mac
+with the SCSI card is often older, for example the Mac that ran ColorGeniusEX on Mac OS X
+10.6 Snow Leopard. Two programs written in C run there:
+
+* [server-c](server-c/README.md) is the scan server itself. The old Mac drives the
+  scanner and serves the web page below to every computer, tablet and phone on the
+  network. Nothing else is needed. This is the usual choice.
+* [bridge-c](bridge-c/README.md) only shares the scanner, for Cezanne Scan or
+  `cezanne-server` on a newer computer.
 
 ## Scanning from any browser (server mode)
 
@@ -167,8 +172,10 @@ frames, densities, droppers, curves, presets and batch scanning. The finished 16
 files, with their ICC profile, download straight to the computer you are using, just as
 if the scanner were connected to it.
 
-On a Mac mini, install the app and then set the server up as a service that starts with
-the Mac:
+On an old Mac with Mac OS X 10.6 to 10.14, use the C version from
+[server-c](server-c/README.md), which serves the same page. On a Mac mini or another Mac
+with macOS 10.15 or later, install the app and then set the server up as a service that
+starts with the Mac:
 
 ```bash
 sudo bash packaging/macos/install-server.sh --token choose-a-secret

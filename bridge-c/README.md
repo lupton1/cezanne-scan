@@ -1,5 +1,9 @@
 # cezanne-bridge for old Macs (Mac OS X 10.6 and later)
 
+> If the old Mac should be the scan server itself, serving the web page to the other
+> devices on the network, use [server-c](../server-c/README.md) instead. This bridge is
+> for when Cezanne Scan or `cezanne-server` runs on another, newer computer.
+
 Cezanne Scan, `cezanne-server` and the Rust `cezanne-bridge` need macOS 10.15 or later
 (Rust itself cannot build for anything older than 10.12). Many Macs that still have a
 working SCSI card for the FT-S5000 run Mac OS X 10.6 Snow Leopard, often the Mac that ran

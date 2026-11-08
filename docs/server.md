@@ -45,7 +45,9 @@ you press **Remove** in the Scans list, so a download that went wrong can be rep
    [hardware.md](hardware.md). Alternatively the scanner stays on a Linux or Windows
    computer running `cezanne-bridge` and the Mac connects to that (use
    `--connect bridge:HOST` below). An older Mac with the SCSI card, down to Mac OS X 10.6,
-   can be that computer with the C bridge from [bridge-c](../bridge-c/README.md).
+   can be the scan server itself with the C version in [server-c](../server-c/README.md),
+   which replaces steps 2 and 3, or share the scanner with the C bridge from
+   [bridge-c](../bridge-c/README.md).
 2. **Install Cezanne Scan** 0.4.0 or later into Applications. `cezanne-server` is inside
    the app. Or build it on the Mac from the source folder:
 

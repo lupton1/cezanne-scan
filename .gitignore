@@ -8,3 +8,7 @@
 /bridge-c/cezanne-bridge
 /bridge-c/cezanne-bridge-relay
 .DS_Store
+/server-c/cezanne-server
+/server-c/cezanne-server-host
+/server-c/assets.h
+/server-c/embed

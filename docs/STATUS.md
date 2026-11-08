@@ -12,6 +12,7 @@ Version 0.4.0, November 2026.
 | Window bytes equal to SCREEN's driver for each original type | unit tests built from the driver analysis |
 | Bridge client and server, token check, refusal of firmware writes from a raw client | loopback tests |
 | C bridge for Mac OS X 10.6 (`bridge-c`): protocol, token, refusal of firmware writes, probe and scan through it identical to the simulator, scan server through it | `make check` and a server run on macOS 15 (2026-11-08). The 10.6 build was checked for 10.6 load commands and system calls only |
+| C scan server for Mac OS X 10.6 (`server-c`): same API answers, prescan image, densities, 12 frame previews and 13 scans in all colour modes (one at 1800 dpi) byte for byte identical to the Rust server, token, busy guard, removing files, earlier scans after a restart, presets | `compare.py` against the simulator through bridges, 164 checks, and the web page in a browser, on Windows (2026-11-08). Not yet built for or run on 10.6 |
 | Image pipeline (positive, flipped negative, auto levels, levels, curve, rotate, channel pick) | unit tests |
 | TIFF and ICC output | unit tests and visual checks. The embedded profile was compared tag by tag with SCREEN's 5000stdRGB (2026-11-02): identical primaries, white, tone curve and class |
 | Desktop app end to end (connect, prescan, frames, scan, save) | scripted demo run against the simulator |
@@ -52,7 +53,10 @@ builder now writes the same bytes as ColorGeniusEX:
 5. **C bridge on Mac OS X 10.6.** Not yet run on 10.6 or with the scanner on the old
    Mac's SCSI card. The first steps are `cezanne-bridge --list` and then a probe from
    Cezanne Scan through it.
-6. **Server mode on a Mac.** `install-server.sh` (launch daemon, firewall, sleep check)
+6. **C scan server on Mac OS X 10.6.** Not yet built with the 10.6 settings, run on 10.6
+   or used with the scanner. The first steps are `cezanne-server --list` on the old Mac,
+   then `cezanne-server --connect auto` and a probe from the page.
+7. **Server mode on a Mac.** `install-server.sh` (launch daemon, firewall, sleep check)
    has been checked for syntax but not yet run on a Mac.
 
 The first test steps are in [hardware.md](hardware.md). The output of `cezanne-cli probe`

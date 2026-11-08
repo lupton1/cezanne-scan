@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+* `server-c`: `cezanne-server` written in plain C for Mac OS X 10.6 Snow Leopard and later,
+  so the old Mac with the SCSI card can be the scan server itself. It drives the scanner
+  through IOKit and serves the same web page and API as the Rust server, and saves the
+  same 16 bit TIFF files with the FT-S5000 colour profile. A side by side test against
+  the simulator (`server-c/compare.py`, 164 checks) found every preview and every saved
+  file byte for byte identical to the Rust server. `server-c/install.sh` installs it as a
+  launch daemon on 10.6. Not yet run on 10.6 or with the scanner
 * `bridge-c`: a `cezanne-bridge` written in plain C for Mac OS X 10.6 Snow Leopard and
   later, for the old Mac that has the SCSI card. Cezanne Scan and `cezanne-server` need
   macOS 10.15, so they run on a newer computer and reach the scanner through this bridge.
